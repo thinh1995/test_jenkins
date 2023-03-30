@@ -42,7 +42,9 @@ pipeline {
             // setBuildStatus("Build succeeded", "SUCCESS");
         }
         failure {
-            pullRequest.createStatus(status: 'failure',
+            script {
+                if (env.CHANGE_ID) {
+                    pullRequest.createStatus(status: 'failure',
                                 context: 'continuous-integration/jenkins/pr-merge/tests',
                                 description: 'All tests are failed',
                                 targetUrl: "${env.JOB_URL}/testResults")
@@ -50,6 +52,7 @@ pipeline {
                     pullRequest.addLabel('Build Failed')
 
                     pullRequest.review('CHANGES_REQUESTED')
+                }
             // setBuildStatus("Build failed", "FAILURE");
         }
     }
