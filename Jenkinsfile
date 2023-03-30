@@ -25,7 +25,7 @@ pipeline {
 
                     pullRequest.addLabel('Build Passing')
 
-                    // pullRequest.review('APPROVE')
+                    pullRequest.review('APPROVE', 'Good')
                 }
             }
         }
