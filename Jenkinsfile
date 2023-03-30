@@ -14,19 +14,8 @@ pipeline {
     }
 
      stages {
-        stage('Merge code master') {
+        stage('Merge code') {
             when {
-                branch 'dev'
-                changeRequest()
-            }
-            steps {
-                echo "Current Pull Request ID: ${pullRequest.id} ${env.CHANGE_ID}"
-            }
-        }
-
-        stage('Merge code dev') {
-            when {
-                branch 'master'
                 changeRequest()
             }
             steps {
