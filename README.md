@@ -1,3 +1,4 @@
 # Test Jenkins
 
-## Setup github with jenkins ocean blue
+## Setup github with jenkins
+- Add Jenkinsfile.
