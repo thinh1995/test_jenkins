@@ -7,7 +7,7 @@ pipeline {
         stage('Merge code') {
             when {
                 branch 'master'
-                changeRequest targetBranch: 'master'
+                changeRequest target: 'master'
             }
             steps {
                 sh 'git merge origin/master'
