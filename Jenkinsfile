@@ -14,10 +14,7 @@ pipeline {
     }
 
      stages {
-        stage('Merge code') {
-            when {
-                changeRequest()
-            }
+        stage('Test') {
             steps {
                 echo "Current Pull Request ID: ${pullRequest.id} ${env.CHANGE_ID}"
             }
