@@ -19,6 +19,8 @@ pipeline {
                 branch 'dev'
             }
             steps {
+                sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
+                sh 'git config --global user.name thinh1995'
                 sh 'git merge origin/master'
             }
         }
