@@ -10,11 +10,9 @@ pipeline {
             }
             steps {
                 echo "Current Pull Request ID: ${env.CHANGE_ID}"
-                script {
-                    if (! pullRequest.mergeable) {
-                        error("Build failed because of having conflicts")
-                    }
-                }
+                sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
+                sh 'git config --global user.name thinh1995'
+                sh 'git merge origin/master'
             }
         }
     }
