@@ -6,7 +6,7 @@ pipeline {
      stages {
         stage('Merge code') {
             when {
-                branch: 'dev'
+                branch 'dev'
             }
             steps {
                 sh 'git merge origin/master'
