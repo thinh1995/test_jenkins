@@ -15,8 +15,11 @@ pipeline {
 
      stages {
         stage('Test') {
+             when {
+                expression { env.CHANGE_ID ==~ /.*/ }
+            }
             steps {
-                echo "Current Pull Request ID: ${pullRequest.id} ${env.CHANGE_ID}"
+                echo "Current Pull Request ID: ${env.CHANGE_ID}"
             }
         }
     }
