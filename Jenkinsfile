@@ -1,12 +1,12 @@
-void setBuildStatus(String message, String state) {
-  step([
-      $class: "GitHubCommitStatusSetter",
-      reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/thinh1995/test_jenkins"],
-      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
-      errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
-      statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
-  ]);
-}
+// void setBuildStatus(String message, String state) {
+//   step([
+//       $class: "GitHubCommitStatusSetter",
+//       reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/thinh1995/test_jenkins"],
+//       contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
+//       errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
+//       statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
+//   ]);
+// }
 
 pipeline {
     agent {
@@ -16,7 +16,7 @@ pipeline {
      stages {
         stage('Test') {
              when {
-                expression { env.CHANGE_ID ==~ /.*/ }
+                changeRequest()
             }
             steps {
                 echo "Current Pull Request ID: ${env.CHANGE_ID}"
@@ -42,7 +42,15 @@ pipeline {
             // setBuildStatus("Build succeeded", "SUCCESS");
         }
         failure {
-            setBuildStatus("Build failed", "FAILURE");
+            pullRequest.createStatus(status: 'failure',
+                                context: 'continuous-integration/jenkins/pr-merge/tests',
+                                description: 'All tests are failed',
+                                targetUrl: "${env.JOB_URL}/testResults")
+
+                    pullRequest.addLabel('Build Failed')
+
+                    pullRequest.review('CHANGES_REQUESTED')
+            // setBuildStatus("Build failed", "FAILURE");
         }
     }
 }
