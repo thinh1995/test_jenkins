@@ -39,7 +39,20 @@ pipeline {
 
     post {
         success {
-            setBuildStatus("Build succeeded", "SUCCESS");
+            script {
+                if (env.CHANGE_ID) {
+                    pullRequest.createStatus(status: 'success',
+                            context: 'continuous-integration/jenkins/pr-merge/tests',
+                            description: 'All tests are passing',
+                            targetUrl: "${env.JOB_URL}/testResults")
+
+                    pullRequest.addLabel('Build Passing')
+
+                    pullRequest.review('APPROVE')
+                }
+            }
+
+            // setBuildStatus("Build succeeded", "SUCCESS");
         }
         failure {
             setBuildStatus("Build failed", "FAILURE");
