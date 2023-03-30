@@ -14,12 +14,21 @@ pipeline {
     }
 
      stages {
-        stage('Merge code') {
+        stage('Merge code master') {
             when {
                 branch 'dev'
             }
             steps {
                 sh 'git merge origin/master'
+            }
+        }
+
+        stage('Merge code dev') {
+            when {
+                branch 'master'
+            }
+            steps {
+                sh 'git merge origin/dev'
             }
         }
     }
