@@ -6,11 +6,11 @@ pipeline {
      stages {
         stage('Merge code') {
             when {
-                branch 'master'
+                branch 'dev'
                 changeRequest target: 'master'
             }
             steps {
-                sh 'git merge origin/dev'
+                sh 'git merge origin/master'
             }
         }
     }
