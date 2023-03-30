@@ -10,6 +10,11 @@ pipeline {
             }
             steps {
                 echo "Current Pull Request ID: ${env.CHANGE_ID}"
+                script {
+                    if (! pullRequest.mergeable) {
+                        error("Build failed because of having conflicts")
+                    }
+                }
             }
         }
     }
