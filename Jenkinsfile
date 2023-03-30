@@ -17,29 +17,40 @@ pipeline {
         stage('Merge code master') {
             when {
                 branch 'dev'
+                changeRequest()
             }
             steps {
-                sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
-                sh 'git config --global user.name thinh1995'
-                sh 'git merge origin/master'
+                echo "Current Pull Request ID: ${pullRequest.id} ${env.CHANGE_ID}"
             }
         }
 
         stage('Merge code dev') {
             when {
                 branch 'master'
+                changeRequest()
             }
             steps {
-                sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
-                sh 'git config --global user.name thinh1995'
-                sh 'git merge origin/dev'
+                echo "Current Pull Request ID: ${pullRequest.id} ${env.CHANGE_ID}"
             }
         }
     }
 
     post {
         success {
-            setBuildStatus("Build succeeded", "SUCCESS");
+            script {
+                if (env.CHANGE_ID) {
+                    pullRequest.createStatus(status: 'success',
+                                context: 'continuous-integration/jenkins/pr-merge/tests',
+                                description: 'All tests are passing',
+                                targetUrl: "${env.JOB_URL}/testResults")
+
+                    pullRequest.addLabel('Build Passing')
+
+                    pullRequest.review('APPROVE')
+                }
+            }
+
+            // setBuildStatus("Build succeeded", "SUCCESS");
         }
         failure {
             setBuildStatus("Build failed", "FAILURE");
