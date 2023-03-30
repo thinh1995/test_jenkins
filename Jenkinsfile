@@ -6,7 +6,7 @@ pipeline {
      stages {
         stage('Merge code') {
             when {
-                branch 'master'
+                branch 'dev'
                 changeRequest target: 'master'
             }
             steps {
