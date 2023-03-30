@@ -25,7 +25,7 @@ pipeline {
 
                     pullRequest.addLabel('Build Passing')
 
-                    pullRequest.review('APPROVE', 'Good')
+                    // pullRequest.review('APPROVE', 'Good')
                 }
             }
         }
@@ -39,7 +39,7 @@ pipeline {
 
                     pullRequest.addLabel('Build Failed')
 
-                    pullRequest.review('CHANGES_REQUESTED', 'Change is the essential process of all existence.')
+                    // pullRequest.review('CHANGES_REQUESTED', 'Change is the essential process of all existence.')
                 }
             }
         }
