@@ -12,7 +12,7 @@ pipeline {
                 echo "Current Pull Request ID: ${env.CHANGE_ID}"
                 sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
                 sh 'git config --global user.name thinh1995'
-                sh 'git merge origin/master'
+                sh 'git merge master'
             }
         }
     }
