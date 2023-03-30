@@ -1,13 +1,3 @@
-// void setBuildStatus(String message, String state) {
-//   step([
-//       $class: "GitHubCommitStatusSetter",
-//       reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/thinh1995/test_jenkins"],
-//       contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
-//       errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
-//       statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
-//   ]);
-// }
-
 pipeline {
     agent {
         label 'ssh-agent'
@@ -38,8 +28,6 @@ pipeline {
                     pullRequest.review('APPROVE')
                 }
             }
-
-            // setBuildStatus("Build succeeded", "SUCCESS");
         }
         failure {
             script {
@@ -51,10 +39,9 @@ pipeline {
 
                     pullRequest.addLabel('Build Failed')
 
-                    pullRequest.review('CHANGES_REQUESTED')
+                    pullRequest.review('CHANGES_REQUESTED', 'Change is the essential process of all existence.')
                 }
             }
-            // setBuildStatus("Build failed", "FAILURE");
         }
     }
 }
