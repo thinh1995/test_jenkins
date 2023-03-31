@@ -23,7 +23,7 @@ pipeline {
 
                     sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     sh "git fetch --all"
-                    sh "git checkout ${pullRequest.base}"
+                    sh "git checkout origin/${pullRequest.base}"
                     sh "git merge --no-edit origin/${pullRequest.headRef}"
                 }
             }
