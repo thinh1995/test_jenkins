@@ -18,6 +18,10 @@ pipeline {
         label 'ssh-agent'
     }
 
+     tools {
+        maven '3.9.1'
+    }
+
     environment {
         APP_ENV = 'latest'
         IMAGE_NAME = 'test'
@@ -34,6 +38,8 @@ pipeline {
             }
             steps {
                 script {
+                    sh './gradlew clean check --no-daemon'
+
                     echo "PR Number: ${pullRequest.number}"
                     echo "PR State ${pullRequest.state}"
                     echo "PR Target Branch ${pullRequest.base}"
@@ -44,17 +50,8 @@ pipeline {
                         throw new Exception("PR has conflicting files!")
                     }
 
-                    recordIssues tools: [php(),
-                        phpCodeSniffer(pattern: '**/phpCodeSniffer.xml'),
-                        phpStan(pattern: '**/phpStan.xml')],
-                        aggregatingResults: 'true', id: 'php', name: 'PHP'
-                    recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
-                    recordIssues tools: [checkStyle(pattern: '**/checkstyle-result.xml'),
-                        spotBugs(pattern: '**/spotbugsXml.xml'),
-                        pmdParser(pattern: '**/pmd.xml'),
-                        cpd(pattern: '**/cpd.xml')],
-                        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
-
+                    recordIssues tools: [java(), checkStyle(pattern: '**/build/**/main.xml', reportEncoding: 'UTF-8')]
+                
                     // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     // sh "git fetch --all"
                     // sh "git checkout origin/${pullRequest.base}"
