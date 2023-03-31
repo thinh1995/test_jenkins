@@ -49,11 +49,18 @@ pipeline {
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
-                    junit allowEmptyResults: true, testResults: '**/target/*-reports/TEST-*.xml'
+                    junit allowEmptyResults: true, testResults: '**/target/*-report.xml'
 
-                    recordIssues tools: [php(), phpCodeSniffer(), phpStan()], aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
+                    recordIssues tools: [php(pattern: '**/target/php-report.xml'),
+                        phpCodeSniffer(pattern: '**/target/phpCodeSniffer-report.xml'),
+                        phpStan(pattern: '**/target/phpStan-report.xml')],
+                        aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
                     recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
-                    recordIssues tools: [checkStyle(), spotBugs(), pmdParser(), cpd()], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                    recordIssues tools: [checkStyle(pattern: '**/target/checkStyle-report.xml'),
+                        spotBugs(pattern: '**/target/spotBugs-report.xml'),
+                        pmdParser(pattern: '**/target/pmdParser-report.xml'),
+                        cpd(pattern: '**/target/cpd-report.xml')],
+                        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
                 }
             }
         }
