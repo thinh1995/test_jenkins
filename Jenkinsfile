@@ -1,11 +1,16 @@
-void setBuildStatus(String message, String state) {
-  step([
-      $class: "GitHubCommitStatusSetter",
-      reposSource: [$class: "ManuallyEnteredRepositorySource", url: "https://github.com/thinh1995/test_jenkins"],
-      contextSource: [$class: "ManuallyEnteredCommitContextSource", context: "ci/jenkins/build-status"],
-      errorHandlers: [[$class: "ChangingBuildStatusErrorHandler", result: "UNSTABLE"]],
-      statusResultSource: [ $class: "ConditionalStatusResultSource", results: [[$class: "AnyBuildResult", message: message, state: state]] ]
-  ]);
+def BuildDokcerImage() {
+    sh 'docker build . -f ${DOCKER_FILE} -t ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
+}
+
+def PushDockerImage() {
+    sh 'echo $dockerhub_PSW | docker login -u $dockerhub_USR --password-stdin'
+    sh 'docker image tag ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
+    sh 'docker push ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
+}
+
+def CleanUpDocker() {
+    sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
+    sh 'docker image prune -f'
 }
 
 pipeline {
@@ -13,13 +18,51 @@ pipeline {
         label 'ssh-agent'
     }
 
+    environment {
+        dockerhub = credentials('dockerhub')
+        APP_ENV = 'latest'
+        IMAGE_NAME = 'test'
+        DOCKER_HUB = 'thinh1995'
+        DOCKER_FILE = 'Dockerfile'
+        recipientEmails = "cuongthinhtuan2006@gmail.com"
+    }
+
      stages {
-        stage('Merge code') {
-            when {
+        stage('Validate Pull Request') {
+             when {
                 changeRequest()
             }
             steps {
-                echo "Current Pull Request ID: ${pullRequest.id}"
+                script {
+                    echo "PR Number: ${pullRequest.number}"
+                    echo "PR State ${pullRequest.state}"
+                    echo "PR Target Branch ${pullRequest.base}"
+                    echo "PR Source Branch ${pullRequest.headRef}"
+                    echo "PR Can Merge ? ${pullRequest.mergeable}"
+
+                    if (!pullRequest.mergeable) {
+                        throw new Exception("PR has conflicting files!")
+                    }
+
+                    sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
+                    sh "git fetch --all"
+                    sh "git checkout origin/${pullRequest.base}"
+                    sh "git merge --no-edit origin/${pullRequest.headRef}"
+
+                    BuildDokcerImage()
+                    CleanUpDocker()
+                }
+            }
+        }
+
+        stage('Deploy Master') {
+            when {
+                branch 'master'
+            }
+            steps {
+                BuildDokcerImage()
+                PushDockerImage()
+                CleanUpDocker()
             }
         }
     }
@@ -27,22 +70,34 @@ pipeline {
     post {
         success {
             script {
-                if (env.CHANGE_ID) {
+                if (pullRequest.id) {
                     pullRequest.createStatus(status: 'success',
                                 context: 'continuous-integration/jenkins/pr-merge/tests',
                                 description: 'All tests are passing',
                                 targetUrl: "${env.JOB_URL}/testResults")
 
-                    pullRequest.addLabel('Build Passing')
-
-                    pullRequest.review('APPROVE')
+                    pullRequest.labels = ['Build Success']
                 }
             }
-
-            // setBuildStatus("Build succeeded", "SUCCESS");
         }
         failure {
-            setBuildStatus("Build failed", "FAILURE");
+            script {
+                if (pullRequest.id) {
+                    pullRequest.createStatus(status: 'failure',
+                                context: 'continuous-integration/jenkins/pr-merge/tests',
+                                description: 'All tests are failed',
+                                targetUrl: "${env.JOB_URL}/testResults")
+
+                    pullRequest.labels = ['Build Failed']
+                }
+            }
+        }
+        always{
+                mail to: "${recipientEmails}",
+                subject: "[Mollibox] Jenkins build:${currentBuild.currentResult}: ${env.JOB_NAME}",
+                body: "A new notification from Mollibox\n${currentBuild.currentResult}: Job ${env.JOB_NAME}\nMore Info can be found here: ${env.BUILD_URL}\n\nJenkins,\nMollibox"
+
+            cleanWs()
         }
     }
 }
