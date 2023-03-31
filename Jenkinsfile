@@ -44,18 +44,16 @@ pipeline {
                         throw new Exception("PR has conflicting files!")
                     }
 
-                    sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
-                    sh "git fetch --all"
-                    sh "git checkout origin/${pullRequest.base}"
-                    sh "git merge --no-edit origin/${pullRequest.headRef}"
+                    // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
+                    // sh "git fetch --all"
+                    // sh "git checkout origin/${pullRequest.base}"
+                    // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
-                    recordIssues tools: [php(pattern: 'target/php-result.xml'), phpCodeSniffer(pattern: 'target/phpCodeSniffer-result.xml'), phpStan(pattern: 'target/phpStan-result.xml')], aggregatingResults: 'true', id: 'php', name: 'PHP'
+                    junit testResults: '**/target/*-reports/TEST-*.xml'
+
+                    recordIssues tools: [php(), phpCodeSniffer(), phpStan()], aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
                     recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
-                    recordIssues tools: [checkStyle(pattern: 'target/checkstyle-result.xml'),
-                        spotBugs(pattern: 'target/spotbugsXml.xml'),
-                        pmdParser(pattern: 'target/pmd.xml'),
-                        cpd(pattern: 'target/cpd.xml')],
-                        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                    recordIssues tools: [checkStyle(), spotBugs(), pmdParser(), cpd()], qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
                 }
             }
         }
