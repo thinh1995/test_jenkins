@@ -34,6 +34,8 @@ pipeline {
             }
             steps {
                 script {
+                    junit allowEmptyResults: true, testResults: 'test-results.xml'
+
                     echo "PR Number: ${pullRequest.number}"
                     echo "PR State ${pullRequest.state}"
                     echo "PR Target Branch ${pullRequest.base}"
