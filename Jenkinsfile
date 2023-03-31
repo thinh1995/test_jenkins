@@ -18,8 +18,8 @@ pipeline {
                 echo "PR can merge ${pullRequest.mergeable}"
                 // sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
                 // sh 'git config --global user.name thinh1995'
-                sh 'git fetch'
-                sh 'git pull --ff-only'
+                git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+                git fetch --all
                 sh "git checkout ${pullRequest.base}"
                 sh "git merge --no-edit ${pullRequest.headRef}"
             }
