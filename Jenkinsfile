@@ -19,7 +19,7 @@ pipeline {
                 changeRequest()
             }
             steps {
-                echo "Current Pull Request ID: ${pullRequest.id} ${env.CHANGE_ID}"
+                echo "Current Pull Request ID: ${pullRequest.id}"
             }
         }
     }
