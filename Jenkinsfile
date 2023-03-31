@@ -16,6 +16,11 @@ pipeline {
                 echo "PR Target branch ${pullRequest.base}"
                 echo "PR Source branch ${pullRequest.headRef}"
                 echo "PR can merge ${pullRequest.mergeable}"
+
+                if (pullRequest.mergeable != true) {
+                    error('PR has conflicts!');
+                }
+
                 // sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
                 // sh 'git config --global user.name thinh1995'
                 sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
@@ -35,8 +40,7 @@ pipeline {
                                 description: 'All tests are passing',
                                 targetUrl: "${env.JOB_URL}/testResults")
 
-                    pullRequest.removeLabel('Build Failed')
-                    pullRequest.addLabel('Build Success')
+                    pullRequest.labels = ['Build Success']
                 }
             }
         }
@@ -48,8 +52,7 @@ pipeline {
                                 description: 'All tests are failed',
                                 targetUrl: "${env.JOB_URL}/testResults")
 
-                    pullRequest.addLabel('Build Success')
-                    pullRequest.addLabel('Build Failed')
+                    pullRequest.labels = ['Build Failed']
                 }
             }
         }
