@@ -47,7 +47,12 @@ pipeline {
                     }
 
                     recordIssues tools: [java(), checkStyle(pattern: '**/build/**/main.xml', reportEncoding: 'UTF-8')]
-                    publishCoverage adapters: [jacoco('**/*/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')
+                    recordCoverage(tools: [[parser: 'JACOCO']],
+                        id: 'jacoco', name: 'JaCoCo Coverage',
+                        sourceCodeRetention: 'EVERY_BUILD',
+                        qualityGates: [
+                                [threshold: 60.0, metric: 'LINE', baseline: 'PROJECT', unstable: true],
+                                [threshold: 60.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]])
                 
                     // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     // sh "git fetch --all"
@@ -73,10 +78,10 @@ pipeline {
         success {
             script {
                 if (env.CHANGE_ID) {
-                    pullRequest.createStatus(status: 'success',
-                                context: 'continuous-integration/jenkins/pr-merge/tests',
-                                description: 'All tests are passing',
-                                targetUrl: "${env.JOB_URL}/testResults")
+                    // pullRequest.createStatus(status: 'success',
+                    //             context: 'continuous-integration/jenkins/pr-merge/tests',
+                    //             description: 'All tests are passing',
+                    //             targetUrl: "${env.JOB_URL}/testResults")
 
                     pullRequest.labels = ['Build Success']
                 }
@@ -85,10 +90,10 @@ pipeline {
         failure {
             script {
                 if (env.CHANGE_ID) {
-                    pullRequest.createStatus(status: 'failure',
-                                context: 'continuous-integration/jenkins/pr-merge/tests',
-                                description: 'All tests are failed',
-                                targetUrl: "${env.JOB_URL}/testResults")
+                    // pullRequest.createStatus(status: 'failure',
+                    //             context: 'continuous-integration/jenkins/pr-merge/tests',
+                    //             description: 'All tests are failed',
+                    //             targetUrl: "${env.JOB_URL}/testResults")
 
                     pullRequest.labels = ['Build Failed']
                 }
