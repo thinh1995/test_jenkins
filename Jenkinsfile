@@ -44,29 +44,16 @@ pipeline {
                         throw new Exception("PR has conflicting files!")
                     }
 
-                    junit allowEmptyResults: true, testResults: '**/build/test-reports/test-*.xml'
-
-                    def php = scanForIssues tool: php(pattern: '**/build/test-reports/test-php.xml')
-                    def phpCodeSniffer = scanForIssues tool: phpCodeSniffer(pattern: '**/build/test-reports/test-phpCodeSniffer.xml')
-                    def phpStan = scanForIssues tool: phpStan(pattern: '**/build/test-reports/test-phpStan.xml')
-                    def errorProne = scanForIssues tool: errorProne(), healthy: 1, unhealthy: 20
-                    def checkStyle = scanForIssues tool: checkStyle(pattern: '**/build/test-reports/test-checkStyle.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
-                    def spotBugs = scanForIssues tool: spotBugs(pattern: '**/build/test-reports/test-spotBugs.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
-                    def pmdParser = scanForIssues tool: pmdParser(pattern: '**/build/test-reports/test-pmdParser.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
-                    def cpd = scanForIssues tool: cpd(pattern: '**/build/test-reports/test-cpd.xml'), qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
-
-                    publishIssues issues: [php, phpCodeSniffer, phpStan, errorProne, checkStyle, spotBugs, pmdParser, cpd], filters: [includePackage('io.jenkins.plugins.analysis.*')]
-
-                    // recordIssues tools: [php(pattern: '**/build/test-reports/test-php.xml'),
-                    //     phpCodeSniffer(pattern: '**/build/test-reports/test-phpCodeSniffer.xml'),
-                    //     phpStan(pattern: '**/build/test-reports/test-phpStan.xml')],
-                    //     aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
-                    // recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
-                    // recordIssues tools: [checkStyle(pattern: '**/build/test-reports/test-checkStyle.xml'),
-                    //     spotBugs(pattern: '**/build/test-reports/test-spotBugs.xml'),
-                    //     pmdParser(pattern: '**/build/test-reports/test-pmdParser.xml'),
-                    //     cpd(pattern: '**/build/test-reports/test-cpd.xml')],
-                    //     qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                    recordIssues tools: [php(pattern: '**/build/test-reports/test-php.xml'),
+                        phpCodeSniffer(pattern: '**/build/test-reports/test-phpCodeSniffer.xml'),
+                        phpStan(pattern: '**/build/test-reports/test-phpStan.xml')],
+                        aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
+                    recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
+                    recordIssues tools: [checkStyle(pattern: '**/build/test-reports/test-checkStyle.xml'),
+                        spotBugs(pattern: '**/build/test-reports/test-spotBugs.xml'),
+                        pmdParser(pattern: '**/build/test-reports/test-pmdParser.xml'),
+                        cpd(pattern: '**/build/test-reports/test-cpd.xml')],
+                        qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
 
                     // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     // sh "git fetch --all"
