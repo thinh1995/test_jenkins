@@ -19,11 +19,11 @@ pipeline {
     }
 
     environment {
-        dockerhub = credentials('dockerhub')
         APP_ENV = 'latest'
         IMAGE_NAME = 'test'
         DOCKER_HUB = 'thinh1995'
         DOCKER_FILE = 'Dockerfile'
+        dockerhub = credentials('dockerhub')
         recipientEmails = "cuongthinhtuan2006@gmail.com"
     }
 
