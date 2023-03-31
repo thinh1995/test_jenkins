@@ -49,17 +49,17 @@ pipeline {
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
-                    junit allowEmptyResults: true, testResults: '**/target/*-report.xml'
+                    junit allowEmptyResults: true, testResults: '**/build/test-reports/test-*.xml'
 
-                    recordIssues tools: [php(pattern: '**/target/php-report.xml'),
-                        phpCodeSniffer(pattern: '**/target/phpCodeSniffer-report.xml'),
-                        phpStan(pattern: '**/target/phpStan-report.xml')],
+                    recordIssues tools: [php(pattern: '**/build/test-reports/test-php.xml'),
+                        phpCodeSniffer(pattern: '**/build/test-reports/test-phpCodeSniffer.xml'),
+                        phpStan(pattern: '**/build/test-reports/test-phpStan.xml')],
                         aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
                     recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
-                    recordIssues tools: [checkStyle(pattern: '**/target/checkStyle-report.xml'),
-                        spotBugs(pattern: '**/target/spotBugs-report.xml'),
-                        pmdParser(pattern: '**/target/pmdParser-report.xml'),
-                        cpd(pattern: '**/target/cpd-report.xml')],
+                    recordIssues tools: [checkStyle(pattern: '**/build/test-reports/test-checkStyle.xml'),
+                        spotBugs(pattern: '**/build/test-reports/test-spotBugs.xml'),
+                        pmdParser(pattern: '**/build/test-reports/test-pmdParser.xml'),
+                        cpd(pattern: '**/build/test-reports/test-cpd.xml')],
                         qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
                 }
             }
