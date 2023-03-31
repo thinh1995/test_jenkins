@@ -46,16 +46,29 @@ pipeline {
 
                     junit allowEmptyResults: true, testResults: '**/build/test-reports/test-*.xml'
 
-                    recordIssues tools: [php(pattern: '**/build/test-reports/test-php.xml'),
+                    def php = scanForIssues tools: [php(pattern: '**/build/test-reports/test-php.xml'),
                         phpCodeSniffer(pattern: '**/build/test-reports/test-phpCodeSniffer.xml'),
                         phpStan(pattern: '**/build/test-reports/test-phpStan.xml')],
-                        aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
-                    recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
-                    recordIssues tools: [checkStyle(pattern: '**/build/test-reports/test-checkStyle.xml'),
+                        aggregatingResults: 'true', id: 'php', name: 'PHP'
+                    def errorProne = scanForIssues tool: errorProne(), healthy: 1, unhealthy: 20
+                    def analysis = scanForIssues tools: [checkStyle(pattern: '**/build/test-reports/test-checkStyle.xml'),
                         spotBugs(pattern: '**/build/test-reports/test-spotBugs.xml'),
                         pmdParser(pattern: '**/build/test-reports/test-pmdParser.xml'),
                         cpd(pattern: '**/build/test-reports/test-cpd.xml')],
                         qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+
+                    publishIssues issues: [php, errorProne, analysis], filters: [includePackage('io.jenkins.plugins.analysis.*')]
+
+                    // recordIssues tools: [php(pattern: '**/build/test-reports/test-php.xml'),
+                    //     phpCodeSniffer(pattern: '**/build/test-reports/test-phpCodeSniffer.xml'),
+                    //     phpStan(pattern: '**/build/test-reports/test-phpStan.xml')],
+                    //     aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
+                    // recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
+                    // recordIssues tools: [checkStyle(pattern: '**/build/test-reports/test-checkStyle.xml'),
+                    //     spotBugs(pattern: '**/build/test-reports/test-spotBugs.xml'),
+                    //     pmdParser(pattern: '**/build/test-reports/test-pmdParser.xml'),
+                    //     cpd(pattern: '**/build/test-reports/test-cpd.xml')],
+                    //     qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
 
                     // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     // sh "git fetch --all"
