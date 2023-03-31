@@ -18,14 +18,14 @@ pipeline {
                     echo "PR Source branch ${pullRequest.headRef}"
                     echo "PR can merge ${pullRequest.mergeable}"
 
-                    if (pullRequest.mergeable != true) {
-                        error('PR has conflicts!');
+                    if (!pullRequest.mergeable) {
+                        throw new Exception("PR has conflicts!")
                     }
 
                     git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
                     git fetch --all
-                    git checkout pullRequest.base
-                    git merge --no-edit origin/pullRequest.headRef
+                    git checkout "${pullRequest.base}"
+                    git merge --no-edit "origin/${pullRequest.headRef}"
                 }
             }
         }
