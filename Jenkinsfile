@@ -6,18 +6,21 @@ pipeline {
      stages {
         stage('Test') {
              when {
-                changeRequest target: 'master'
+                changeRequest()
                 
             }
             steps {
-                echo "Current Pull Request ID: ${env.CHANGE_ID}"
+                echo "Current PR ID: ${env.CHANGE_ID}"
                 echo "Current git branch ${env.GIT_BRANCH}"
-                sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
-                sh 'git config --global user.name thinh1995'
-                sh 'git fetch'
-                sh "git checkout ${env.GIT_BRANCH}"
-                sh 'git checkout master'
-                sh "git merge --no-edit ${env.GIT_BRANCH}"
+                echo "Current PR State ${env.GITHUB_PR_STATE}"
+                echo "PR Target branch ${env.GITHUB_PR_TARGET_BRANCH}"
+                echo "PR Source branch ${env.GITHUB_PR_SOURCE_BRANCH}"
+                // sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
+                // sh 'git config --global user.name thinh1995'
+                // sh 'git fetch'
+                // sh "git checkout ${env.GIT_BRANCH}"
+                // sh 'git checkout master'
+                // sh "git merge --no-edit ${env.GIT_BRANCH}"
             }
         }
     }
@@ -32,8 +35,6 @@ pipeline {
                                 targetUrl: "${env.JOB_URL}/testResults")
 
                     pullRequest.addLabel('Build Passing')
-
-                    // pullRequest.review('APPROVE', 'Good')
                 }
             }
         }
@@ -46,8 +47,6 @@ pipeline {
                                 targetUrl: "${env.JOB_URL}/testResults")
 
                     pullRequest.addLabel('Build Failed')
-
-                    // pullRequest.review('CHANGES_REQUESTED', 'Change is the essential process of all existence.')
                 }
             }
         }
