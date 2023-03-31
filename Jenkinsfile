@@ -10,23 +10,23 @@ pipeline {
                 
             }
             steps {
-                echo "Current PR ID: ${env.CHANGE_ID}"
-                echo "Current git branch ${env.GIT_BRANCH}"
-                echo "Current PR State ${pullRequest.state}"
-                echo "PR Target branch ${pullRequest.base}"
-                echo "PR Source branch ${pullRequest.headRef}"
-                echo "PR can merge ${pullRequest.mergeable}"
+                script {
+                    echo "Current PR ID: ${env.CHANGE_ID}"
+                    echo "Current git branch ${env.GIT_BRANCH}"
+                    echo "Current PR State ${pullRequest.state}"
+                    echo "PR Target branch ${pullRequest.base}"
+                    echo "PR Source branch ${pullRequest.headRef}"
+                    echo "PR can merge ${pullRequest.mergeable}"
 
-                if (pullRequest.mergeable != true) {
-                    error('PR has conflicts!');
+                    if (pullRequest.mergeable != true) {
+                        error('PR has conflicts!');
+                    }
+
+                    git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
+                    git fetch --all
+                    git checkout pullRequest.base
+                    git merge --no-edit origin/pullRequest.headRef
                 }
-
-                // sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
-                // sh 'git config --global user.name thinh1995'
-                sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
-                sh "git fetch --all"
-                sh "git checkout ${pullRequest.base}"
-                sh "git merge --no-edit origin/${pullRequest.headRef}"
             }
         }
     }
