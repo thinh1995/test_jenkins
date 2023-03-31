@@ -19,6 +19,7 @@ pipeline {
                 // sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
                 // sh 'git config --global user.name thinh1995'
                 sh 'git fetch'
+                sh 'git pull --ff-only'
                 sh "git checkout ${pullRequest.base}"
                 sh "git merge --no-edit ${pullRequest.headRef}"
             }
