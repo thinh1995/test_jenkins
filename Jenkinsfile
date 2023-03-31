@@ -34,10 +34,6 @@ pipeline {
             }
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: 'github_account', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        pullRequest.setCredentials(username, password)
-                    }
-
                     junit allowEmptyResults: true, skipPublishingChecks: true, testResults: 'test-results.xml'
 
                     echo "PR Number: ${pullRequest.number}"
@@ -82,24 +78,30 @@ pipeline {
         success {
             script {
                 if (env.CHANGE_ID) {
-                    pullRequest.createStatus(status: 'success',
+                    withCredentials([usernamePassword(credentialsId: 'github_account', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        pullRequest.setCredentials(username, password)
+                        pullRequest.createStatus(status: 'success',
                                 context: 'continuous-integration/jenkins/pr-merge/tests',
                                 description: 'All tests are passing',
                                 targetUrl: "${env.JOB_URL}/testResults")
 
-                    pullRequest.labels = ['Build Success']
+                        pullRequest.labels = ['Build Success']
+                    }
                 }
             }
         }
         failure {
             script {
                 if (env.CHANGE_ID) {
-                    pullRequest.createStatus(status: 'failure',
+                    withCredentials([usernamePassword(credentialsId: 'github_account', passwordVariable: 'password', usernameVariable: 'username')]) {
+                        pullRequest.setCredentials(username, password)
+                        pullRequest.createStatus(status: 'failure',
                                 context: 'continuous-integration/jenkins/pr-merge/tests',
                                 description: 'All tests are failed',
                                 targetUrl: "${env.JOB_URL}/testResults")
 
-                    pullRequest.labels = ['Build Failed']
+                        pullRequest.labels = ['Build Failed']
+                    }
                 }
             }
         }
