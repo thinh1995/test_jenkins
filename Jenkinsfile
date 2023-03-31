@@ -18,10 +18,6 @@ pipeline {
         label 'ssh-agent'
     }
 
-     tools {
-        maven '3.9.1'
-    }
-
     environment {
         APP_ENV = 'latest'
         IMAGE_NAME = 'test'
@@ -51,6 +47,7 @@ pipeline {
                     }
 
                     recordIssues tools: [java(), checkStyle(pattern: '**/build/**/main.xml', reportEncoding: 'UTF-8')]
+                    publishCoverage adapters: [jacoco('**/*/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD')
                 
                     // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     // sh "git fetch --all"
