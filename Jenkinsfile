@@ -70,30 +70,30 @@ pipeline {
     }
 
     post {
-        success {
-            script {
-                if (env.CHANGE_ID) {
-                    pullRequest.createStatus(status: 'success',
-                                context: 'continuous-integration/jenkins/pr-merge/tests',
-                                description: 'All tests are passing',
-                                targetUrl: "${env.JOB_URL}/testResults")
+        // success {
+        //     script {
+        //         if (env.CHANGE_ID) {
+        //             pullRequest.createStatus(status: 'success',
+        //                         context: 'continuous-integration/jenkins/pr-merge/tests',
+        //                         description: 'All tests are passing',
+        //                         targetUrl: "${env.JOB_URL}/testResults")
 
-                    pullRequest.labels = ['Build Success']
-                }
-            }
-        }
-        failure {
-            script {
-                if (env.CHANGE_ID) {
-                    pullRequest.createStatus(status: 'failure',
-                                context: 'continuous-integration/jenkins/pr-merge/tests',
-                                description: 'All tests are failed',
-                                targetUrl: "${env.JOB_URL}/testResults")
+        //             pullRequest.labels = ['Build Success']
+        //         }
+        //     }
+        // }
+        // failure {
+        //     script {
+        //         if (env.CHANGE_ID) {
+        //             pullRequest.createStatus(status: 'failure',
+        //                         context: 'continuous-integration/jenkins/pr-merge/tests',
+        //                         description: 'All tests are failed',
+        //                         targetUrl: "${env.JOB_URL}/testResults")
 
-                    pullRequest.labels = ['Build Failed']
-                }
-            }
-        }
+        //             pullRequest.labels = ['Build Failed']
+        //         }
+        //     }
+        // }
         always {
             script {
                 if (env.BRANCH_NAME == 'master') {
