@@ -49,7 +49,7 @@ pipeline {
                     sh "git checkout origin/${pullRequest.base}"
                     sh "git merge --no-edit origin/${pullRequest.headRef}"
 
-                    recordIssues tools: [php(), phpCodeSniffer(), phpStan()], aggregatingResults: 'true', id: 'php', name: 'PHP'
+                    recordIssues tools: [php(), phpCodeSniffer(pattern: 'target/phpCodeSniffer-result.xml'), phpStan()], aggregatingResults: 'true', id: 'php', name: 'PHP'
                     recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
                     recordIssues tools: [checkStyle(pattern: 'target/checkstyle-result.xml'),
                         spotBugs(pattern: 'target/spotbugsXml.xml'),
