@@ -6,13 +6,16 @@ pipeline {
      stages {
         stage('Test') {
              when {
-                changeRequest()
+                changeRequest target: 'master'
+                
             }
             steps {
                 echo "Current Pull Request ID: ${env.CHANGE_ID}"
+                echo "Current git branch ${env.GIT_BRANCH}"
                 sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
                 sh 'git config --global user.name thinh1995'
-                sh 'git fetch --all'
+                sh 'git fetch'
+                sh "git checkout ${env.GIT_BRANCH}"
                 sh 'git checkout master'
                 sh "git merge --no-edit ${env.GIT_BRANCH}"
             }
