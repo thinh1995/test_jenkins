@@ -13,15 +13,14 @@ pipeline {
                 echo "Current PR ID: ${env.CHANGE_ID}"
                 echo "Current git branch ${env.GIT_BRANCH}"
                 echo "Current PR State ${pullRequest.state}"
-                echo "PR Target branch ${pullRequest.headRef}"
-                echo "PR Source branch ${pullRequest.base}"
+                echo "PR Target branch ${pullRequest.base}"
+                echo "PR Source branch ${pullRequest.headRef}"
                 echo "PR can merge ${pullRequest.mergeable}"
                 // sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
                 // sh 'git config --global user.name thinh1995'
-                // sh 'git fetch'
-                // sh "git checkout ${env.GIT_BRANCH}"
-                // sh 'git checkout master'
-                // sh "git merge --no-edit ${env.GIT_BRANCH}"
+                git fetch
+                git checkout "${pullRequest.base}"
+                git merge --no-edit "${pullRequest.headRef}"
             }
         }
     }
