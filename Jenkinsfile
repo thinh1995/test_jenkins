@@ -12,9 +12,10 @@ pipeline {
             steps {
                 echo "Current PR ID: ${env.CHANGE_ID}"
                 echo "Current git branch ${env.GIT_BRANCH}"
-                echo "Current PR State ${env.GITHUB_PR_STATE}"
-                echo "PR Target branch ${env.GITHUB_PR_TARGET_BRANCH}"
-                echo "PR Source branch ${env.GITHUB_PR_SOURCE_BRANCH}"
+                echo "Current PR State ${pullRequest.state}"
+                echo "PR Target branch ${pullRequest.headRef}"
+                echo "PR Source branch ${pullRequest.base}"
+                echo "PR can merge ${pullRequest.mergeable}"
                 // sh 'git config --global user.email cuongthinhtuan2006@gmail.com'
                 // sh 'git config --global user.name thinh1995'
                 // sh 'git fetch'
@@ -34,7 +35,8 @@ pipeline {
                                 description: 'All tests are passing',
                                 targetUrl: "${env.JOB_URL}/testResults")
 
-                    pullRequest.addLabel('Build Passing')
+                    pullRequest.removeLabel('Build Failed')
+                    pullRequest.addLabel('Build Success')
                 }
             }
         }
@@ -46,6 +48,7 @@ pipeline {
                                 description: 'All tests are failed',
                                 targetUrl: "${env.JOB_URL}/testResults")
 
+                    pullRequest.addLabel('Build Success')
                     pullRequest.addLabel('Build Failed')
                 }
             }
