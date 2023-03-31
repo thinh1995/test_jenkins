@@ -7,7 +7,6 @@ pipeline {
         stage('Test') {
              when {
                 changeRequest()
-                
             }
             steps {
                 script {
@@ -22,10 +21,10 @@ pipeline {
                     //     throw new Exception("PR has conflicts!")
                     // }
 
-                    git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-                    git fetch --all
-                    git checkout "${pullRequest.base}"
-                    git merge --no-edit "origin/${pullRequest.headRef}"
+                    sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
+                    sh "git fetch --all"
+                    sh "git checkout ${pullRequest.base}"
+                    sh "git merge --no-edit origin/${pullRequest.headRef}"
                 }
             }
         }
