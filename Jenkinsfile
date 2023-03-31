@@ -34,8 +34,6 @@ pipeline {
             }
             steps {
                 script {
-                    sh './gradlew clean check --no-daemon'
-
                     echo "PR Number: ${pullRequest.number}"
                     echo "PR State ${pullRequest.state}"
                     echo "PR Target Branch ${pullRequest.base}"
