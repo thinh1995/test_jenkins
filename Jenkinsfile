@@ -70,7 +70,7 @@ pipeline {
     post {
         success {
             script {
-                if (pullRequest.id) {
+                if (env.CHANGE_ID) {
                     pullRequest.createStatus(status: 'success',
                                 context: 'continuous-integration/jenkins/pr-merge/tests',
                                 description: 'All tests are passing',
@@ -82,7 +82,7 @@ pipeline {
         }
         failure {
             script {
-                if (pullRequest.id) {
+                if (env.CHANGE_ID) {
                     pullRequest.createStatus(status: 'failure',
                                 context: 'continuous-integration/jenkins/pr-merge/tests',
                                 description: 'All tests are failed',
