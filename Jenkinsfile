@@ -46,7 +46,7 @@ pipeline {
                         throw new Exception("PR has conflicting files!")
                     }
 
-                    recordIssues tools: [java(), checkStyle(pattern: '**/build/**/main.xml', reportEncoding: 'UTF-8')]
+                    recordIssues tools: [php(), checkStyle(pattern: '**/build/**/main.xml', reportEncoding: 'UTF-8')]
                     recordCoverage(tools: [[parser: 'JACOCO']],
                         id: 'jacoco', name: 'JaCoCo Coverage',
                         sourceCodeRetention: 'EVERY_BUILD',
@@ -78,30 +78,24 @@ pipeline {
         success {
             script {
                 if (env.CHANGE_ID) {
-                    withCredentials([usernamePassword(credentialsId: 'github_account', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        pullRequest.setCredentials(username, password)
-                        pullRequest.createStatus(status: 'success',
-                                context: 'continuous-integration/jenkins/pr-merge/tests',
-                                description: 'All tests are passing',
-                                targetUrl: "${env.JOB_URL}/testResults")
+                    pullRequest.createStatus(status: 'success',
+                            context: 'continuous-integration/jenkins/pr-merge/tests',
+                            description: 'All tests are passing',
+                            targetUrl: "${env.JOB_URL}/testResults")
 
-                        pullRequest.labels = ['Build Success']
-                    }
+                    pullRequest.labels = ['Build Success']
                 }
             }
         }
         failure {
             script {
                 if (env.CHANGE_ID) {
-                    withCredentials([usernamePassword(credentialsId: 'github_account', passwordVariable: 'password', usernameVariable: 'username')]) {
-                        pullRequest.setCredentials(username, password)
-                        pullRequest.createStatus(status: 'failure',
-                                context: 'continuous-integration/jenkins/pr-merge/tests',
-                                description: 'All tests are failed',
-                                targetUrl: "${env.JOB_URL}/testResults")
+                    pullRequest.createStatus(status: 'failure',
+                            context: 'continuous-integration/jenkins/pr-merge/tests',
+                            description: 'All tests are failed',
+                            targetUrl: "${env.JOB_URL}/testResults")
 
-                        pullRequest.labels = ['Build Failed']
-                    }
+                    pullRequest.labels = ['Build Failed']
                 }
             }
         }
