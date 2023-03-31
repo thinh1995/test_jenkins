@@ -4,22 +4,21 @@ pipeline {
     }
 
      stages {
-        stage('Test') {
+        stage('Validate Pull Request') {
              when {
                 changeRequest()
             }
             steps {
                 script {
-                    echo "Current PR ID: ${env.CHANGE_ID}"
-                    echo "Current git branch ${env.GIT_BRANCH}"
+                    echo "Current PR ID: ${pullRequest.id}"
                     echo "Current PR State ${pullRequest.state}"
                     echo "PR Target branch ${pullRequest.base}"
                     echo "PR Source branch ${pullRequest.headRef}"
                     echo "PR can merge ${pullRequest.mergeable}"
 
-                    // if (!pullRequest.mergeable) {
-                    //     throw new Exception("PR has conflicts!")
-                    // }
+                    if (!pullRequest.mergeable) {
+                        throw new Exception("PR has conflicts!")
+                    }
 
                     sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     sh "git fetch --all"
@@ -28,12 +27,21 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy Master') {
+            when {
+                branch 'master'
+            }
+            steps {
+                echo 'Deploying master ...'
+            }
+        }
     }
 
     post {
         success {
             script {
-                if (env.CHANGE_ID) {
+                if (pullRequest.id) {
                     pullRequest.createStatus(status: 'success',
                                 context: 'continuous-integration/jenkins/pr-merge/tests',
                                 description: 'All tests are passing',
@@ -45,7 +53,7 @@ pipeline {
         }
         failure {
             script {
-                if (env.CHANGE_ID) {
+                if (pullRequest.id) {
                     pullRequest.createStatus(status: 'failure',
                                 context: 'continuous-integration/jenkins/pr-merge/tests',
                                 description: 'All tests are failed',
