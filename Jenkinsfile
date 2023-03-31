@@ -34,6 +34,8 @@ pipeline {
             }
             steps {
                 script {
+                    sh 'mvn -V -e clean verify -Dmaven.test.failure.ignore'
+                    
                     echo "PR Number: ${pullRequest.number}"
                     echo "PR State ${pullRequest.state}"
                     echo "PR Target Branch ${pullRequest.base}"
