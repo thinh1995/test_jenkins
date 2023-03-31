@@ -34,11 +34,11 @@ pipeline {
             }
             steps {
                 script {
-                    echo "PR ID: ${pullRequest.id}"
+                    echo "PR Number: ${pullRequest.number}"
                     echo "PR State ${pullRequest.state}"
-                    echo "PR Target branch ${pullRequest.base}"
-                    echo "PR Source branch ${pullRequest.headRef}"
-                    echo "PR can merge ${pullRequest.mergeable}"
+                    echo "PR Target Branch ${pullRequest.base}"
+                    echo "PR Source Branch ${pullRequest.headRef}"
+                    echo "PR Can Merge ? ${pullRequest.mergeable}"
 
                     if (!pullRequest.mergeable) {
                         throw new Exception("PR has conflicting files!")
