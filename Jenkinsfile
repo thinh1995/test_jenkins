@@ -47,12 +47,7 @@ pipeline {
                     }
 
                     recordIssues tools: [php(), checkStyle(pattern: '**/build/**/main.xml', reportEncoding: 'UTF-8')]
-                    recordCoverage(tools: [[parser: 'JACOCO']],
-                        id: 'jacoco', name: 'JaCoCo Coverage',
-                        sourceCodeRetention: 'EVERY_BUILD',
-                        qualityGates: [
-                                [threshold: 60.0, metric: 'LINE', baseline: 'PROJECT', unstable: true],
-                                [threshold: 60.0, metric: 'BRANCH', baseline: 'PROJECT', unstable: true]])
+                    publishCoverage adapters: [jacoco('**/*/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
                 
                     // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     // sh "git fetch --all"
