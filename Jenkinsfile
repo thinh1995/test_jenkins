@@ -29,13 +29,17 @@ pipeline {
 
      stages {
         stage('Unit Tests') {
-             when {
+            agent {
+                docker {
+                    image 'allebb/phptestrunner-81:latest'
+                    args '-u root:sudo'
+                }
+            }
+            when {
                 changeRequest()
             }
             steps {
                 script {
-                    sh 'composer install'
-
                     junit allowEmptyResults: true, skipPublishingChecks: true, testResults: 'test-results.xml'
 
                     echo "PR Number: ${pullRequest.number}"
@@ -64,6 +68,13 @@ pipeline {
                     // sh "git fetch --all"
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
+
+                    echo 'Running PHP 7.4 tests...'
+                    sh 'php -v'
+                    echo 'Installing Composer'
+                    sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
+                    echo 'Installing project composer dependencies...'
+                    sh 'composer install --no-progress'
 
                     sh 'vendor/bin/phpunit'
                     xunit([
