@@ -66,13 +66,6 @@ pipeline {
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
-                    // sh 'apt-get update'
-                    // sh 'apt-get install git -y'
-                    // sh 'apt-get install -y zip unzip'
-                    // echo 'Running PHP 8.2 tests...'
-                    // sh 'php -v'
-                    // echo 'Installing Composer'
-                    // sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
                     echo 'Installing project composer dependencies...'
                     sh 'composer install'
                     sh 'cp .env.example .env'
@@ -136,15 +129,15 @@ pipeline {
                 ]
             ])
             
-            // publishHTML([
-            //     allowMissing: false,
-            //     alwaysLinkToLastBuild: false,
-            //     keepAll: false,
-            //     reportDir: 'build/logs/coverage',
-            //     reportFiles: 'index.html',
-            //     reportName: 'Coverage Report (HTML)',
-            //     reportTitles: ''
-            // ])
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: false,
+                reportDir: 'build/logs/coverage',
+                reportFiles: 'index.html',
+                reportName: 'Coverage Report (HTML)',
+                reportTitles: ''
+            ])
             
             publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
             // publishCoverage adapters: [jacoco('build/logs/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
