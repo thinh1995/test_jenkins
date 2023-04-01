@@ -137,7 +137,7 @@ pipeline {
                 reportDir: 'build/coverage',
                 reportFiles: 'index.html',
                 reportName: 'Coverage Report (HTML)',
-                reportTitles: ''
+                reportTitles: 'Report'
             ])
             
             publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
