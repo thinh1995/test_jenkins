@@ -92,23 +92,23 @@ pipeline {
         }
 
         stage('Static Analysis') {
-            parallel {
+            // parallel {
                 stage('CodeSniffer') {
                     steps {
                         sh 'vendor/bin/phpcs --standard=phpcs.xml .'
                     }
                 }
-                stage('PHP Compatibility Checks') {
-                    steps {
-                        sh 'vendor/bin/phpcs --standard=phpcs.xml .'
-                    }
-                }
+                // stage('PHP Compatibility Checks') {
+                //     steps {
+                //         sh 'vendor/bin/phpcs --standard=phpcs.xml .'
+                //     }
+                // }
                 // stage('PHPStan') {
                 //     steps {
                 //         sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -n . > build/logs/phpstan.checkstyle.xml'
                 //     }
                 // }
-            }
+            // }
         }
 
         // stage('Deploy Master') {
