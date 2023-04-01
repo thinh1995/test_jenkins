@@ -85,6 +85,7 @@ pipeline {
                         copyArtifacts(
                             filter: 'build/coverage/*',
                             projectName: env.JOB_NAME,
+                            target: 
                             // fingerprintArtifacts: true,
                             // selector: specific(env.BUILD_NUMBER)
                         )
@@ -138,11 +139,10 @@ pipeline {
                 ]
             ])
             
-            publishHTML([
+            publishHTML(target: [
                 allowMissing: false,
-                alwaysLinkToLastBuild: false,
-                includes: '**/*',
-                keepAll: false,
+                alwaysLinkToLastBuild: true,
+                keepAll: true,
                 reportDir: 'build/coverage',
                 reportFiles: 'index.html',
                 reportName: 'Coverage Report (HTML)',
