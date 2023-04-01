@@ -144,8 +144,8 @@ pipeline {
             //     reportName: 'Coverage Report (HTML)',
             //     reportTitles: ''
             // ])
-            publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
-            // publishCoverage adapters: [jacoco('**/*/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
+// publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+            publishCoverage adapters: [jacoco('build/logs/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
 
             cleanWs()
         }
