@@ -93,11 +93,11 @@ pipeline {
 
         stage('Static Analysis') {
             // parallel {
-                stage('CodeSniffer') {
+                // stage('CodeSniffer') {
                     steps {
                         sh 'vendor/bin/phpcs --standard=phpcs.xml .'
                     }
-                }
+                // }
                 // stage('PHP Compatibility Checks') {
                 //     steps {
                 //         sh 'vendor/bin/phpcs --standard=phpcs.xml .'
