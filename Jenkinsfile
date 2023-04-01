@@ -16,7 +16,7 @@
 pipeline {
     agent {
         docker {
-            image 'php:cli'
+            image 'sineverba/php8xc:latest'
             args '-u root:sudo'
         }
     }
@@ -66,13 +66,13 @@ pipeline {
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
-                    sh 'apt-get update'
-                    sh 'apt-get install git -y'
-                    sh 'apt-get install -y zip unzip'
-                    echo 'Running PHP 8.2 tests...'
-                    sh 'php -v'
-                    echo 'Installing Composer'
-                    sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
+                    // sh 'apt-get update'
+                    // sh 'apt-get install git -y'
+                    // sh 'apt-get install -y zip unzip'
+                    // echo 'Running PHP 8.2 tests...'
+                    // sh 'php -v'
+                    // echo 'Installing Composer'
+                    // sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
                     echo 'Installing project composer dependencies...'
                     sh 'composer install'
                     sh 'cp .env.example .env'
@@ -85,7 +85,7 @@ pipeline {
             //     stage('PHPUnit') {
                     steps {
                         sh 'vendor/bin/phpunit'
-                        cobertura coberturaReportFile: 'build/logs/cobertura.xml'
+                        vendor/bin/phpunit --coverage-cobertura="build/logs/cobertura.xml"
                     }
             //     }
             //     stage('CodeSniffer') {
