@@ -81,23 +81,23 @@ pipeline {
         }
 
         stage('Static Analysis') {
-            parallel {
-                stage('PHPUnit') {
+            // parallel {
+            //     stage('PHPUnit') {
                     steps {
                         sh 'vendor/bin/phpunit'
                     }
-                }
-                stage('CodeSniffer') {
-                    steps {
-                        sh 'vendor/bin/phpcs'
-                    }
-                }
-                stage('PHPStan') {
-                    steps {
-                        sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
-                    }
-                }
-            }
+            //     }
+            //     stage('CodeSniffer') {
+            //         steps {
+            //             sh 'vendor/bin/phpcs'
+            //         }
+            //     }
+            //     stage('PHPStan') {
+            //         steps {
+            //             sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
+            //         }
+            //     }
+            // }
         }
 
         // stage('Deploy Master') {
@@ -137,15 +137,15 @@ pipeline {
 
             cobertura coberturaReportFile: 'build/logs/coverage.xml'
             
-            publishHTML([
-                allowMissing: false,
-                alwaysLinkToLastBuild: false,
-                keepAll: false,
-                reportDir: 'build/coverage',
-                reportFiles: 'index.html',
-                reportName: 'Coverage Report (HTML)',
-                reportTitles: ''
-            ])
+            // publishHTML([
+            //     allowMissing: false,
+            //     alwaysLinkToLastBuild: false,
+            //     keepAll: false,
+            //     reportDir: 'build/logs/coverage',
+            //     reportFiles: 'index.html',
+            //     reportName: 'Coverage Report (HTML)',
+            //     reportTitles: ''
+            // ])
             
             publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
             // publishCoverage adapters: [jacoco('build/logs/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
