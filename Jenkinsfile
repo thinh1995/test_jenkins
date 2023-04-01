@@ -85,7 +85,7 @@ pipeline {
             //     stage('PHPUnit') {
                     steps {
                         sh 'vendor/bin/phpunit'
-                        vendor/bin/phpunit --coverage-cobertura="build/logs/cobertura.xml"
+                        sh "vendor/bin/phpunit --coverage-cobertura='build/logs/cobertura.xml'"
                     }
             //     }
             //     stage('CodeSniffer') {
