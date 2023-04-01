@@ -66,6 +66,7 @@ pipeline {
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
+                    sh 'apt-get update'
                     sh 'apt-get install git'
                     echo 'Running PHP 8.2 tests...'
                     sh 'php -v'
