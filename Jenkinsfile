@@ -34,6 +34,8 @@ pipeline {
             }
             steps {
                 script {
+                    sh 'composer install'
+
                     junit allowEmptyResults: true, skipPublishingChecks: true, testResults: 'test-results.xml'
 
                     echo "PR Number: ${pullRequest.number}"
