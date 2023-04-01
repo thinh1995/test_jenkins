@@ -68,12 +68,13 @@ pipeline {
 
                     sh 'apt-get update'
                     sh 'apt-get install git -y'
+                    sh 'apt-get install -y zip unzip php-zip'
                     echo 'Running PHP 8.2 tests...'
                     sh 'php -v'
                     echo 'Installing Composer'
                     sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
                     echo 'Installing project composer dependencies...'
-                    sh 'composer install --prefer-dist'
+                    sh 'composer install'
 
                     sh 'vendor/bin/phpunit'
                     xunit([
