@@ -21,7 +21,7 @@ pipeline {
         }
     }
     options {
-        copyArtifactPermission("${env.JOB_NAME}");
+        copyArtifactPermission('*');
     }
 
     environment {
@@ -82,7 +82,12 @@ pipeline {
                     steps {
                         sh 'vendor/bin/phpunit'
                         sh "vendor/bin/phpunit --coverage-cobertura='build/logs/cobertura.xml'"
-                        step ([$class: 'CopyArtifact', projectName: "${env.JOB_NAME}", filter: 'build/coverage/*']);
+                        copyArtifacts(
+                            filter: 'build/coverage/*',
+                            projectName: env.JOB_NAME,
+                            // fingerprintArtifacts: true,
+                            // selector: specific(env.BUILD_NUMBER)
+                        )
                     }
             //     }
             //     stage('CodeSniffer') {
