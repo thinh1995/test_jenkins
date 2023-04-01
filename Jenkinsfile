@@ -132,6 +132,7 @@ pipeline {
             publishHTML([
                 allowMissing: false,
                 alwaysLinkToLastBuild: false,
+                includes: '**/*',
                 keepAll: false,
                 reportDir: 'build/coverage',
                 reportFiles: 'index.html',
