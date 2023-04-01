@@ -31,8 +31,7 @@ pipeline {
         stage('Unit Tests') {
             agent {
                 docker {
-                    image 'php:cli-alpine3.17'
-                    args '-u root:sudo'
+                    image 'php:cli'
                 }
             }
             when {
