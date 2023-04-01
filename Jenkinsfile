@@ -146,16 +146,16 @@ pipeline {
                 ]
             ])
 
-            publishHTML([
-                allowMissing: false,
-                alwaysLinkToLastBuild: false,
-                keepAll: false,
-                reportDir: 'build/coverage',
-                reportFiles: 'index.html',
-                reportName: 'Coverage Report (HTML)',
-                reportTitles: ''
-            ])
-            publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+            // publishHTML([
+            //     allowMissing: false,
+            //     alwaysLinkToLastBuild: false,
+            //     keepAll: false,
+            //     reportDir: 'build/coverage',
+            //     reportFiles: 'index.html',
+            //     reportName: 'Coverage Report (HTML)',
+            //     reportTitles: ''
+            // ])
+            // publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
 
             cleanWs()
         }
