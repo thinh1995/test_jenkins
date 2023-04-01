@@ -133,7 +133,7 @@ pipeline {
                 allowMissing: false,
                 alwaysLinkToLastBuild: false,
                 keepAll: false,
-                reportDir: 'build/logs/coverage',
+                reportDir: 'build/coverage',
                 reportFiles: 'index.html',
                 reportName: 'Coverage Report (HTML)',
                 reportTitles: ''
