@@ -76,23 +76,17 @@ pipeline {
                     echo 'Installing project composer dependencies...'
                     sh 'composer install'
                     sh 'cp .env.example .env'
-
-                    sh 'vendor/bin/phpunit'
-                    xunit([
-                        thresholds: [
-                            failed ( failureThreshold: "0" ),
-                            skipped ( unstableThreshold: "0" )
-                        ],
-                        tools: [
-                            PHPUnit(pattern: 'build/logs/junit.xml', stopProcessingIfError: true, failIfNotNew: true)
-                        ]
-                    ])
                 }
             }
         }
 
         stage('Static Analysis') {
             parallel {
+                stage('PHPUnit') {
+                    steps {
+                        sh 'vendor/bin/phpunit'
+                    }
+                }
                 stage('CodeSniffer') {
                     steps {
                         sh 'vendor/bin/phpcs'
@@ -135,6 +129,7 @@ pipeline {
                 blameDisabled: true,
                 referenceJobName: "repo-name/master",
                 tools: [
+                    php(id: 'php', name: 'php', reportEncoding: 'UTF-8'),
                     phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
                     phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
                 ]
