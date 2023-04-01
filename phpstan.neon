@@ -1,0 +1,7 @@
+parameters:
+    tmpDir: build/cache/phpstan
+    paths:
+        - app
+    level: 9
+    ignoreErrors:
+    excludePaths:

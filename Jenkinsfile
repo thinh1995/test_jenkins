@@ -28,7 +28,7 @@ pipeline {
     }
 
      stages {
-        stage('Validate Pull Request') {
+        stage('Unit Tests') {
              when {
                 changeRequest()
             }
@@ -46,13 +46,63 @@ pipeline {
                         throw new Exception("PR has conflicting files!")
                     }
 
-                    recordIssues tools: [php(), checkStyle(pattern: '**/build/**/main.xml', reportEncoding: 'UTF-8')]
-                    publishCoverage adapters: [jacoco('**/*/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
+                    // recordIssues tools: [php(pattern: '**/build/**/test-php.xml'),
+                    //     phpCodeSniffer(pattern: '**/build/**/test-phpCodeSniffer.xml'),
+                    //     phpStan(pattern: '**/build/**/test-phpStan.xml')],
+                    //     aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
+                    // recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
+                    // recordIssues tools: [checkStyle(pattern: '**/build/**/test-checkStyle.xml', , reportEncoding: 'UTF-8'),
+                    //     spotBugs(pattern: '**/build/**/test-spotBugs.xml'),
+                    //     pmdParser(pattern: '**/build/**/test-pmdParser.xml'),
+                    //     cpd(pattern: '**/build/**/test-cpd.xml')],
+                    //     qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
+                    // publishCoverage adapters: [jacoco('**/*/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
                 
                     // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     // sh "git fetch --all"
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
+
+                    sh 'vendor/bin/phpunit'
+                    xunit([
+                        thresholds: [
+                            failed ( failureThreshold: "0" ),
+                            skipped ( unstableThreshold: "0" )
+                        ],
+                        tools: [
+                            PHPUnit(pattern: 'build/logs/junit.xml', stopProcessingIfError: true, failIfNotNew: true)
+                        ]
+                    ])
+                    publishHTML([
+                        allowMissing: false,
+                        alwaysLinkToLastBuild: false,
+                        keepAll: false,
+                        reportDir: 'build/coverage',
+                        reportFiles: 'index.html',
+                        reportName: 'Coverage Report (HTML)',
+                        reportTitles: ''
+                    ])
+                    publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+                }
+            }
+        }
+
+        stage('Static Analysis') {
+            parallel {
+                stage('CodeSniffer') {
+                    steps {
+                        sh 'vendor/bin/phpcs --standard=phpcs.xml .'
+                    }
+                }
+                stage('PHP Compatibility Checks') {
+                    steps {
+                        sh 'vendor/bin/phpcs --standard=phpcs-compatibility.xml .'
+                    }
+                }
+                stage('PHPStan') {
+                    steps {
+                        sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -n . > build/logs/phpstan.checkstyle.xml'
+                    }
                 }
             }
         }
@@ -70,30 +120,6 @@ pipeline {
     }
 
     post {
-        success {
-            script {
-                if (env.CHANGE_ID) {
-                    // pullRequest.createStatus(status: 'success',
-                    //         context: 'continuous-integration/jenkins/pr-merge/tests',
-                    //         description: 'All tests are passing',
-                    //         targetUrl: "${env.JOB_URL}/testResults")
-
-                    pullRequest.labels = ['Build Success']
-                }
-            }
-        }
-        failure {
-            script {
-                if (env.CHANGE_ID) {
-                    // pullRequest.createStatus(status: 'failure',
-                    //         context: 'continuous-integration/jenkins/pr-merge/tests',
-                    //         description: 'All tests are failed',
-                    //         targetUrl: "${env.JOB_URL}/testResults")
-
-                    pullRequest.labels = ['Build Failed']
-                }
-            }
-        }
         always {
             script {
                 if (env.BRANCH_NAME == 'master') {
@@ -102,6 +128,19 @@ pipeline {
                     body: "A new notification from Mollibox\n${currentBuild.currentResult}: Job ${env.JOB_NAME}\nMore Info can be found here: ${env.BUILD_URL}\n\nJenkins,\nMollibox"
                 }
             }
+
+            recordIssues([
+                sourceCodeEncoding: 'UTF-8',
+                enabledForFailure: true,
+                aggregatingResults: true,
+                blameDisabled: true,
+                referenceJobName: "repo-name/master",
+                tools: [
+                    phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
+                    phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
+                    phpCodeSniffer(id: 'phpcompat', name: 'PHP Compatibility', pattern: 'build/logs/phpcs-compat.checkstyle.xml', reportEncoding: 'UTF-8')
+                ]
+            ])
 
             cleanWs()
         }
