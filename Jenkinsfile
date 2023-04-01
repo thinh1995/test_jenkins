@@ -32,6 +32,7 @@ pipeline {
             agent {
                 docker {
                     image 'php:cli-alpine3.17'
+                    args '-u root:sudo'
                 }
             }
             when {
@@ -68,11 +69,12 @@ pipeline {
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
+                    echo 'Running PHP 8.2 tests...'
                     sh 'php -v'
                     echo 'Installing Composer'
                     sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
                     echo 'Installing project composer dependencies...'
-                    sh 'composer install'
+                    sh 'composer install --no-progress'
 
                     sh 'vendor/bin/phpunit'
                     xunit([
