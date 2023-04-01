@@ -78,15 +78,15 @@ pipeline {
                     sh 'cp .env.example .env'
 
                     sh 'vendor/bin/phpunit'
-                    // xunit([
-                    //     thresholds: [
-                    //         failed ( failureThreshold: "0" ),
-                    //         skipped ( unstableThreshold: "0" )
-                    //     ],
-                    //     tools: [
-                    //         PHPUnit(pattern: 'build/logs/junit.xml', stopProcessingIfError: true, failIfNotNew: true)
-                    //     ]
-                    // ])
+                    xunit([
+                        thresholds: [
+                            failed ( failureThreshold: "0" ),
+                            skipped ( unstableThreshold: "0" )
+                        ],
+                        tools: [
+                            PHPUnit(pattern: 'build/logs/junit.xml', stopProcessingIfError: true, failIfNotNew: true)
+                        ]
+                    ])
                 }
             }
         }
@@ -140,16 +140,17 @@ pipeline {
                 ]
             ])
 
-            publishHTML([
-                allowMissing: false,
-                alwaysLinkToLastBuild: false,
-                keepAll: false,
-                reportDir: 'build/coverage',
-                reportFiles: 'index.html',
-                reportName: 'Coverage Report (HTML)',
-                reportTitles: ''
-            ])
+            // publishHTML([
+            //     allowMissing: false,
+            //     alwaysLinkToLastBuild: false,
+            //     keepAll: false,
+            //     reportDir: 'build/coverage',
+            //     reportFiles: 'index.html',
+            //     reportName: 'Coverage Report (HTML)',
+            //     reportTitles: ''
+            // ])
             publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+            // publishCoverage adapters: [jacoco('**/*/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
 
             cleanWs()
         }
