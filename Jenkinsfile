@@ -66,12 +66,13 @@ pipeline {
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
+                    sh 'apt-get install git'
                     echo 'Running PHP 8.2 tests...'
                     sh 'php -v'
                     echo 'Installing Composer'
                     sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
                     echo 'Installing project composer dependencies...'
-                    sh 'composer install'
+                    sh 'composer install --prefer-dist'
 
                     sh 'vendor/bin/phpunit'
                     xunit([
