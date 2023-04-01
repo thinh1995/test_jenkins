@@ -130,12 +130,12 @@ pipeline {
                 referenceJobName: "repo-name/master",
                 tools: [
                     php(id: 'php', name: 'php', reportEncoding: 'UTF-8'),
-                    phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
-                    phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
+                    // phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
+                    // phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
                 ]
             ])
 
-            cobertura coberturaReportFile: 'build/logs/coverage.xml'
+            cobertura coberturaReportFile: 'build/logs/cobertura.xml'
             
             // publishHTML([
             //     allowMissing: false,
