@@ -75,6 +75,7 @@ pipeline {
                     sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
                     echo 'Installing project composer dependencies...'
                     sh 'composer install'
+                    sh 'cp .env.example .env'
 
                     sh 'vendor/bin/phpunit'
                     xunit([
