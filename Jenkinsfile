@@ -32,6 +32,7 @@ pipeline {
             agent {
                 docker {
                     image 'php:cli'
+                    args '-u root:sudo'
                 }
             }
             when {
