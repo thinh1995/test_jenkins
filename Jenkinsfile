@@ -20,6 +20,9 @@ pipeline {
             args '-u root:sudo'
         }
     }
+    options {
+        copyArtifactPermission("${env.JOB_NAME}");
+    }
 
     environment {
         APP_ENV = 'latest'
@@ -79,7 +82,7 @@ pipeline {
                     steps {
                         sh 'vendor/bin/phpunit'
                         sh "vendor/bin/phpunit --coverage-cobertura='build/logs/cobertura.xml'"
-                        step ([$class: 'CopyArtifact', projectName: "test_jenkins", filter: 'build/coverage/*']);
+                        step ([$class: 'CopyArtifact', projectName: "Test jenkins", filter: 'build/coverage/*']);
                     }
             //     }
             //     stage('CodeSniffer') {
