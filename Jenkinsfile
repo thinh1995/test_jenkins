@@ -85,6 +85,7 @@ pipeline {
             //     stage('PHPUnit') {
                     steps {
                         sh 'vendor/bin/phpunit'
+                        cobertura coberturaReportFile: 'build/logs/cobertura.xml'
                     }
             //     }
             //     stage('CodeSniffer') {
@@ -134,8 +135,6 @@ pipeline {
                     // phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
                 ]
             ])
-
-            cobertura coberturaReportFile: 'build/logs/cobertura.xml'
             
             // publishHTML([
             //     allowMissing: false,
