@@ -31,8 +31,7 @@ pipeline {
         stage('Unit Tests') {
             agent {
                 docker {
-                    image 'allebb/phptestrunner-81:latest'
-                    args '-u root:sudo'
+                    image 'php:cli-alpine3.17'
                 }
             }
             when {
@@ -69,12 +68,11 @@ pipeline {
                     // sh "git checkout origin/${pullRequest.base}"
                     // sh "git merge --no-edit origin/${pullRequest.headRef}"
 
-                    echo 'Running PHP 7.4 tests...'
                     sh 'php -v'
                     echo 'Installing Composer'
                     sh 'curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/bin --filename=composer'
                     echo 'Installing project composer dependencies...'
-                    sh 'composer install --no-progress'
+                    sh 'composer install'
 
                     sh 'vendor/bin/phpunit'
                     xunit([
