@@ -92,23 +92,18 @@ pipeline {
         }
 
         stage('Static Analysis') {
-            // parallel {
-                // stage('CodeSniffer') {
+            parallel {
+                stage('CodeSniffer') {
                     steps {
-                        sh 'vendor/bin/phpcs --standard=phpcs.xml .'
+                        sh 'vendor/bin/phpcs'
                     }
-                // }
-                // stage('PHP Compatibility Checks') {
-                //     steps {
-                //         sh 'vendor/bin/phpcs --standard=phpcs.xml .'
-                //     }
-                // }
-                // stage('PHPStan') {
-                //     steps {
-                //         sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -n . > build/logs/phpstan.checkstyle.xml'
-                //     }
-                // }
-            // }
+                }
+                stage('PHPStan') {
+                    steps {
+                        sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
+                    }
+                }
+            }
         }
 
         // stage('Deploy Master') {
@@ -141,21 +136,20 @@ pipeline {
                 referenceJobName: "repo-name/master",
                 tools: [
                     phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
-                    // phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
-                    phpCodeSniffer(id: 'phpcompat', name: 'PHP Compatibility', pattern: 'build/logs/phpcs-compat.checkstyle.xml', reportEncoding: 'UTF-8')
+                    phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
                 ]
             ])
 
-            // publishHTML([
-            //     allowMissing: false,
-            //     alwaysLinkToLastBuild: false,
-            //     keepAll: false,
-            //     reportDir: 'build/coverage',
-            //     reportFiles: 'index.html',
-            //     reportName: 'Coverage Report (HTML)',
-            //     reportTitles: ''
-            // ])
-            // publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+            publishHTML([
+                allowMissing: false,
+                alwaysLinkToLastBuild: false,
+                keepAll: false,
+                reportDir: 'build/coverage',
+                reportFiles: 'index.html',
+                reportName: 'Coverage Report (HTML)',
+                reportTitles: ''
+            ])
+            publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
 
             cleanWs()
         }

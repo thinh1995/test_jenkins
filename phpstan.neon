@@ -2,6 +2,19 @@ parameters:
     tmpDir: build/cache/phpstan
     paths:
         - app
+        - bootstrap
+        - config
+        - database
+        - lang
+        - resources
+        - routes
+        - tests
     level: 9
     ignoreErrors:
     excludePaths:
+        - bootstrap/cache/*
+        - bootstrap/autoload.php
+        - */migrations/*
+        - */seeds/*
+        - *.blade.php
+        - *.js
