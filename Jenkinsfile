@@ -68,7 +68,7 @@ pipeline {
 
                     sh 'apt-get update'
                     sh 'apt-get install git -y'
-                    sh 'apt-get install -y zip unzip php-zip'
+                    sh 'apt-get install -y zip unzip php8.2-zip'
                     echo 'Running PHP 8.2 tests...'
                     sh 'php -v'
                     echo 'Installing Composer'
