@@ -1,0 +1,10 @@
+includes:
+    - ./vendor/nunomaduro/larastan/extension.neon
+parameters:
+    errorFormat: checkstyle
+    tmpDir: build/cache/phpstan
+    paths:
+        - app
+    level: 9
+    ignoreErrors:
+    excludePaths:

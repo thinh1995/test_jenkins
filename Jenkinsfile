@@ -1,14 +1,14 @@
-def BuildDokcerImage() {
+def buildDokcerImage() {
     sh 'docker build . -f ${DOCKER_FILE} -t ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
 }
 
-def PushDockerImage() {
+def pushDockerImage() {
     sh 'echo $dockerhub_PSW | docker login -u $dockerhub_USR --password-stdin'
     sh 'docker image tag ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
     sh 'docker push ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
 }
 
-def CleanUpDocker() {
+def cleanUpDocker() {
     sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
     sh 'docker image prune -f'
 }
@@ -28,8 +28,8 @@ pipeline {
     }
 
      stages {
-        stage('Validate Pull Request') {
-             when {
+        stage('Get latest code') {
+            when {
                 changeRequest()
             }
             steps {
@@ -43,15 +43,76 @@ pipeline {
                     if (!pullRequest.mergeable) {
                         throw new Exception("PR has conflicting files!")
                     }
-
+                
+                    // sh "cd ${WORKSPACE}"
                     sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     sh "git fetch --all"
                     sh "git checkout origin/${pullRequest.base}"
                     sh "git merge --no-edit origin/${pullRequest.headRef}"
-
-                    BuildDokcerImage()
-                    CleanUpDocker()
                 }
+            }
+        }
+
+        stage('Prepare dependencies') {
+            agent {
+                docker {
+                    image 'sineverba/php8xc:latest'
+                    args '-u root:sudo'
+                    reuseNode true
+                }
+            }
+            steps {
+                echo 'Installing project composer dependencies...'
+                sh 'composer install'
+                sh 'cp .env.example .env'
+            }
+        }
+
+        stage('Static Analysis') {
+            parallel {
+                stage('PHPUnit') {
+                    agent {
+                        docker {
+                            image 'sineverba/php8xc:latest'
+                            args '-u root:sudo'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh 'vendor/bin/phpunit'
+                        sh "vendor/bin/phpunit --coverage-cobertura='build/logs/cobertura.xml' tests/"
+                    }
+                }
+                stage('CodeSniffer') {
+                    agent {
+                        docker {
+                            image 'sineverba/php8xc:latest'
+                            args '-u root:sudo'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh 'vendor/bin/phpcs --standard=phpcs.xml'
+                    }
+                }
+                stage('PHPStan') {
+                    agent {
+                        docker {
+                            image 'sineverba/php8xc:latest'
+                            args '-u root:sudo'
+                            reuseNode true
+                        }
+                    }
+                    steps {
+                        sh 'vendor/bin/phpstan analyse --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
+                    }
+                }
+            }
+        }
+
+        stage ('Buid Docker Image') {
+            steps {
+                buildDokcerImage()
             }
         }
 
@@ -60,44 +121,42 @@ pipeline {
                 branch 'master'
             }
             steps {
-                BuildDokcerImage()
-                PushDockerImage()
-                CleanUpDocker()
+                pushDockerImage()
             }
         }
     }
 
     post {
-        success {
-            script {
-                if (env.CHANGE_ID) {
-                    pullRequest.createStatus(status: 'success',
-                                context: 'continuous-integration/jenkins/pr-merge/tests',
-                                description: 'All tests are passing',
-                                targetUrl: "${env.JOB_URL}/testResults")
-
-                    pullRequest.labels = ['Build Success']
-                }
-            }
-        }
-        failure {
-            script {
-                if (env.CHANGE_ID) {
-                    pullRequest.createStatus(status: 'failure',
-                                context: 'continuous-integration/jenkins/pr-merge/tests',
-                                description: 'All tests are failed',
-                                targetUrl: "${env.JOB_URL}/testResults")
-
-                    pullRequest.labels = ['Build Failed']
-                }
-            }
-        }
         always {
             script {
                 if (env.BRANCH_NAME == 'master') {
                     mail to: "${recipientEmails}",
                     subject: "[Mollibox] Jenkins build:${currentBuild.currentResult}: ${env.JOB_NAME}",
                     body: "A new notification from Mollibox\n${currentBuild.currentResult}: Job ${env.JOB_NAME}\nMore Info can be found here: ${env.BUILD_URL}\n\nJenkins,\nMollibox"
+                }
+
+                withChecks('Integration Tests') {
+                    junit allowEmptyResults: true, testResults: 'build/logs/*.xml'
+                }
+
+                publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+
+                recordIssues([
+                    sourceCodeEncoding: 'UTF-8',
+                    enabledForFailure: true,
+                    aggregatingResults: true,
+                    blameDisabled: true,
+                    referenceJobName: "${env.JOB_NAME}",
+                    tools: [
+                        phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
+                        phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
+                    ]
+                ])
+
+                def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
+
+                if ("${oldImageID}" != '' ) {
+                    cleanUpDocker()
                 }
             }
 
