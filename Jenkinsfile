@@ -15,10 +15,7 @@ def cleanUpDocker() {
 
 pipeline {
     agent {
-        docker {
-            image 'sineverba/php8xc:latest'
-            args '-u root:sudo'
-        }
+        label ssh_agent
     }
 
     environment {
@@ -63,6 +60,12 @@ pipeline {
         }
 
         stage('Static Analysis') {
+            agent {
+                docker {
+                    image 'sineverba/php8xc:latest'
+                    args '-u root:sudo'
+                }
+            }
             parallel {
                 stage('PHPUnit') {
                     steps {
