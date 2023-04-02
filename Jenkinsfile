@@ -15,7 +15,7 @@ def cleanUpDocker() {
 
 pipeline {
     agent {
-        label ssh_agent
+        label 'ssh-agent'
     }
 
     environment {
