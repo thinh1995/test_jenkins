@@ -46,7 +46,7 @@ pipeline {
                         throw new Exception("PR has conflicting files!")
                     }
                 
-                    sh "cd ${WORKSPACE}"
+                    // sh "cd ${WORKSPACE}"
                     sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     sh "git fetch --all"
                     sh "git checkout origin/${pullRequest.base}"
@@ -60,13 +60,13 @@ pipeline {
         }
 
         stage('Static Analysis') {
-            agent {
-                docker {
-                    image 'sineverba/php8xc:latest'
-                    args '-u root:sudo'
-                }
-            }
             parallel {
+                agent {
+                    docker {
+                        image 'sineverba/php8xc:latest'
+                        args '-u root:sudo'
+                    }
+                }
                 stage('PHPUnit') {
                     steps {
                         sh 'vendor/bin/phpunit'
