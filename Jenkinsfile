@@ -61,6 +61,12 @@ pipeline {
                     reuseNode true
                 }
             }
+            when { 
+                anyOf{
+                    changeRequest();
+                    branch 'master';
+                }
+            }
             steps {
                 echo 'Installing project composer dependencies...'
                 sh 'composer install'
@@ -69,6 +75,12 @@ pipeline {
         }
 
         stage('Static Analysis') {
+            when { 
+                anyOf{
+                    changeRequest();
+                    branch 'master';
+                }
+            }
             parallel {
                 stage('PHPUnit') {
                     agent {
@@ -111,6 +123,12 @@ pipeline {
         }
 
         stage ('Buid Docker Image') {
+            when { 
+                anyOf{
+                    changeRequest();
+                    branch 'master';
+                }
+            }
             steps {
                 buildDokcerImage()
             }
