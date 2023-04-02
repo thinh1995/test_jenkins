@@ -1,17 +1,17 @@
-// def BuildDokcerImage() {
-//     sh 'docker build . -f ${DOCKER_FILE} -t ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
-// }
+def BuildDokcerImage() {
+    sh 'docker build . -f ${DOCKER_FILE} -t ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
+}
 
-// def PushDockerImage() {
-//     sh 'echo $dockerhub_PSW | docker login -u $dockerhub_USR --password-stdin'
-//     sh 'docker image tag ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
-//     sh 'docker push ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
-// }
+def PushDockerImage() {
+    sh 'echo $dockerhub_PSW | docker login -u $dockerhub_USR --password-stdin'
+    sh 'docker image tag ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
+    sh 'docker push ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
+}
 
-// def CleanUpDocker() {
-//     sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
-//     sh 'docker image prune -f'
-// }
+def CleanUpDocker() {
+    sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
+    sh 'docker image prune -f'
+}
 
 pipeline {
     agent {
@@ -34,7 +34,7 @@ pipeline {
     }
 
      stages {
-        stage('Unit Tests') {
+        stage('Preapre Test Env') {
             when {
                 changeRequest()
             }
@@ -51,23 +51,11 @@ pipeline {
                     if (!pullRequest.mergeable) {
                         throw new Exception("PR has conflicting files!")
                     }
-
-                    // recordIssues tools: [php(pattern: '**/build/**/test-php.xml'),
-                    //     phpCodeSniffer(pattern: '**/build/**/test-phpCodeSniffer.xml'),
-                    //     phpStan(pattern: '**/build/**/test-phpStan.xml')],
-                    //     aggregatingResults: 'true', id: 'php', name: 'PHP', filters: [includePackage('io.jenkins.plugins.analysis.*')]
-                    // recordIssues tool: errorProne(), healthy: 1, unhealthy: 20
-                    // recordIssues tools: [checkStyle(pattern: '**/build/**/test-checkStyle.xml', , reportEncoding: 'UTF-8'),
-                    //     spotBugs(pattern: '**/build/**/test-spotBugs.xml'),
-                    //     pmdParser(pattern: '**/build/**/test-pmdParser.xml'),
-                    //     cpd(pattern: '**/build/**/test-cpd.xml')],
-                    //     qualityGates: [[threshold: 1, type: 'TOTAL', unstable: true]]
-                    // publishCoverage adapters: [jacoco('**/*/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
                 
-                    // sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
-                    // sh "git fetch --all"
-                    // sh "git checkout origin/${pullRequest.base}"
-                    // sh "git merge --no-edit origin/${pullRequest.headRef}"
+                    sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
+                    sh "git fetch --all"
+                    sh "git checkout origin/${pullRequest.base}"
+                    sh "git merge --no-edit origin/${pullRequest.headRef}"
 
                     echo 'Installing project composer dependencies...'
                     sh 'composer install'
@@ -77,43 +65,36 @@ pipeline {
         }
 
         stage('Static Analysis') {
-            // parallel {
-            //     stage('PHPUnit') {
+            parallel {
+                stage('PHPUnit') {
                     steps {
                         sh 'vendor/bin/phpunit'
                         sh "vendor/bin/phpunit --coverage-cobertura='build/logs/cobertura.xml'"
-                        copyArtifacts(
-                            filter: 'build/coverage/*',
-                            projectName: env.JOB_NAME,
-                            target: 
-                            // fingerprintArtifacts: true,
-                            // selector: specific(env.BUILD_NUMBER)
-                        )
                     }
-            //     }
-            //     stage('CodeSniffer') {
-            //         steps {
-            //             sh 'vendor/bin/phpcs'
-            //         }
-            //     }
-            //     stage('PHPStan') {
-            //         steps {
-            //             sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
-            //         }
-            //     }
-            // }
+                }
+                stage('CodeSniffer') {
+                    steps {
+                        sh 'vendor/bin/phpcs'
+                    }
+                }
+                stage('PHPStan') {
+                    steps {
+                        sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
+                    }
+                }
+            }
         }
 
-        // stage('Deploy Master') {
-        //     when {
-        //         branch 'master'
-        //     }
-        //     steps {
-        //         BuildDokcerImage()
-        //         PushDockerImage()
-        //         CleanUpDocker()
-        //     }
-        // }
+        stage('Deploy Master') {
+            when {
+                branch 'master'
+            }
+            steps {
+                BuildDokcerImage()
+                PushDockerImage()
+                CleanUpDocker()
+            }
+        }
     }
 
     post {
@@ -134,23 +115,12 @@ pipeline {
                 referenceJobName: "repo-name/master",
                 tools: [
                     php(id: 'php', name: 'php', reportEncoding: 'UTF-8'),
-                    // phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
-                    // phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
+                    phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
+                    phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
                 ]
             ])
             
-            publishHTML(target: [
-                allowMissing: false,
-                alwaysLinkToLastBuild: true,
-                keepAll: true,
-                reportDir: 'build/coverage',
-                reportFiles: 'index.html',
-                reportName: 'Coverage Report (HTML)',
-                reportTitles: 'Report'
-            ])
-            
             publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
-            // publishCoverage adapters: [jacoco('build/logs/jacoco.xml')], sourceFileResolver: sourceFiles('STORE_ALL_BUILD'), skipPublishingChecks: true
 
             cleanWs()
         }
