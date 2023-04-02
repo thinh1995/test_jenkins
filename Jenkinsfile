@@ -104,7 +104,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh 'vendor/bin/phpstan analyse --error-format=checkstyle -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
+                        sh 'vendor/bin/phpstan analyse --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
                     }
                 }
             }
@@ -135,22 +135,23 @@ pipeline {
                     body: "A new notification from Mollibox\n${currentBuild.currentResult}: Job ${env.JOB_NAME}\nMore Info can be found here: ${env.BUILD_URL}\n\nJenkins,\nMollibox"
                 }
 
+                withChecks('Integration Tests') {
+                    junit allowEmptyResults: true, testResults: 'build/logs/*.xml'
+                }
+
                 recordIssues([
                     sourceCodeEncoding: 'UTF-8',
                     enabledForFailure: true,
                     aggregatingResults: true,
                     blameDisabled: true,
-                    referenceJobName: "repo-name/master",
+                    referenceJobName: "${env.JOB_NAME}",
                     tools: [
-                        php(id: 'php', name: 'php', pattern: 'build/logs/phpunit.junit.xml', reportEncoding: 'UTF-8'),
                         phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
                         phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
                     ]
                 ])
             
                 publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
-
-                junit allowEmptyResults: true, testResults: 'build/logs/*.xml'
 
                 def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
 

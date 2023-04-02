@@ -1,4 +1,5 @@
 parameters:
+    errorFormat: checkstyle
     tmpDir: build/cache/phpstan
     paths:
         - app
