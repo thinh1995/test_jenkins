@@ -29,6 +29,10 @@ pipeline {
         label 'ssh-agent'
     }
 
+    options {
+        timeout(time: 10, unit: 'SECONDS') 
+    }
+
     environment {
         APP_ENV = 'latest'
         IMAGE_NAME = 'test'
