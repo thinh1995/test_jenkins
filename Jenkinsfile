@@ -10,7 +10,8 @@ def pushDockerImage() {
 
 def cleanUpDocker() {
     sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
-    sh 'docker image prune -f'
+    sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
+    sh 'docker system prune -f'
 }
 
 pipeline {
