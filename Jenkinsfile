@@ -1,14 +1,14 @@
-def BuildDokcerImage() {
+def buildDokcerImage() {
     sh 'docker build . -f ${DOCKER_FILE} -t ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
 }
 
-def PushDockerImage() {
+def pushDockerImage() {
     sh 'echo $dockerhub_PSW | docker login -u $dockerhub_USR --password-stdin'
     sh 'docker image tag ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER} ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
     sh 'docker push ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
 }
 
-def CleanUpDocker() {
+def cleanUpDocker() {
     sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
     sh 'docker image prune -f'
 }
@@ -19,9 +19,6 @@ pipeline {
             image 'sineverba/php8xc:latest'
             args '-u root:sudo'
         }
-    }
-    options {
-        copyArtifactPermission('*');
     }
 
     environment {
@@ -52,6 +49,7 @@ pipeline {
                         throw new Exception("PR has conflicting files!")
                     }
                 
+                    sh "cd ${WORKSPACE}"
                     sh "git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'"
                     sh "git fetch --all"
                     sh "git checkout origin/${pullRequest.base}"
@@ -85,14 +83,18 @@ pipeline {
             }
         }
 
+        stage ('Buid Docker Image') {
+            steps {
+                buildDokcerImage()
+            }
+        }
+
         stage('Deploy Master') {
             when {
                 branch 'master'
             }
             steps {
-                BuildDokcerImage()
-                PushDockerImage()
-                CleanUpDocker()
+                pushDockerImage()
             }
         }
     }
@@ -105,22 +107,26 @@ pipeline {
                     subject: "[Mollibox] Jenkins build:${currentBuild.currentResult}: ${env.JOB_NAME}",
                     body: "A new notification from Mollibox\n${currentBuild.currentResult}: Job ${env.JOB_NAME}\nMore Info can be found here: ${env.BUILD_URL}\n\nJenkins,\nMollibox"
                 }
-            }
 
-            recordIssues([
-                sourceCodeEncoding: 'UTF-8',
-                enabledForFailure: true,
-                aggregatingResults: true,
-                blameDisabled: true,
-                referenceJobName: "repo-name/master",
-                tools: [
-                    php(id: 'php', name: 'php', reportEncoding: 'UTF-8'),
-                    phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
-                    phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
-                ]
-            ])
+                recordIssues([
+                    sourceCodeEncoding: 'UTF-8',
+                    enabledForFailure: true,
+                    aggregatingResults: true,
+                    blameDisabled: true,
+                    referenceJobName: "repo-name/master",
+                    tools: [
+                        php(id: 'php', name: 'php', reportEncoding: 'UTF-8'),
+                        phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
+                        phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
+                    ]
+                ])
             
-            publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+                publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+
+                if (!(sh "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}' 2 > $null")) {
+                    cleanUpDocker()
+                }
+            }
 
             cleanWs()
         }
