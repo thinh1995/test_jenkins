@@ -123,7 +123,9 @@ pipeline {
             
                 publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
 
-                if (!(sh 'docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER} 2 > $null')) {
+                def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
+
+                if ("${oldImageID}" != '' ) {
                     cleanUpDocker()
                 }
             }
