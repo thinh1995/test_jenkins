@@ -61,24 +61,36 @@ pipeline {
 
         stage('Static Analysis') {
             parallel {
-                agent {
-                    docker {
-                        image 'sineverba/php8xc:latest'
-                        args '-u root:sudo'
-                    }
-                }
                 stage('PHPUnit') {
+                    agent {
+                        docker {
+                            image 'sineverba/php8xc:latest'
+                            args '-u root:sudo'
+                        }
+                    }
                     steps {
                         sh 'vendor/bin/phpunit'
                         sh "vendor/bin/phpunit --coverage-cobertura='build/logs/cobertura.xml'"
                     }
                 }
                 stage('CodeSniffer') {
+                    agent {
+                        docker {
+                            image 'sineverba/php8xc:latest'
+                            args '-u root:sudo'
+                        }
+                    }
                     steps {
                         sh 'vendor/bin/phpcs'
                     }
                 }
                 stage('PHPStan') {
+                    agent {
+                        docker {
+                            image 'sineverba/php8xc:latest'
+                            args '-u root:sudo'
+                        }
+                    }
                     steps {
                         sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
                     }
