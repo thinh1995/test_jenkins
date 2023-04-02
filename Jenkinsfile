@@ -55,7 +55,7 @@ pipeline {
             }
         }
 
-        state('Prepare dependencies') {
+        stage('Prepare dependencies') {
             agent {
                 docker {
                     image 'sineverba/php8xc:latest'
