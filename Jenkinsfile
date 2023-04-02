@@ -80,7 +80,26 @@ pipeline {
                     }
                     steps {
                         sh 'vendor/bin/phpunit'
-                        sh "vendor/bin/phpunit --coverage-cobertura='build/logs/cobertura.xml'"
+                        xunit([
+                            thresholds: [
+                                failed ( failureThreshold: "0" ),
+                                skipped ( unstableThreshold: "0" )
+                            ],
+                            tools: [
+                                PHPUnit(pattern: 'build/logs/phpunit.junit.xml', stopProcessingIfError: true, failIfNotNew: true)
+                            ]
+                        ])
+                        publishHTML([
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: false,
+                            keepAll: false,
+                            reportDir: 'build/coverage',
+                            reportFiles: 'index.html',
+                            reportName: 'Coverage Report (HTML)',
+                            reportTitles: ''
+                        ])
+
+                        publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
                     }
                 }
                 stage('CodeSniffer') {
@@ -151,7 +170,7 @@ pipeline {
                     ]
                 ])
             
-                publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+                // publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
 
                 def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
 
