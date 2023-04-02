@@ -80,28 +80,7 @@ pipeline {
                     }
                     steps {
                         sh 'vendor/bin/phpunit'
-                        sh "vendor/bin/phpunit --coverage-clover 'build/logs/clover.xml' tests/"
-
-                        xunit([
-                            thresholds: [
-                                failed ( failureThreshold: "0" ),
-                                skipped ( unstableThreshold: "0" )
-                            ],
-                            tools: [
-                                PHPUnit(pattern: 'build/logs/phpunit.junit.xml', stopProcessingIfError: true, failIfNotNew: true)
-                            ]
-                        ])
-
-                        clover(cloverReportDir: 'build/logs', cloverReportFileName: 'clover.xml',
-                            // optional, default is: method=70, conditional=80, statement=80
-                            healthyTarget: [methodCoverage: 70, conditionalCoverage: 80, statementCoverage: 80],
-                            // optional, default is none
-                            unhealthyTarget: [methodCoverage: 50, conditionalCoverage: 50, statementCoverage: 50],
-                            // optional, default is none
-                            failingTarget: [methodCoverage: 0, conditionalCoverage: 0, statementCoverage: 0]
-                        )
-
-                        // publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+                        sh "vendor/bin/phpunit --coverage-cobertura='build/logs/cobertura.xml' tests/"
                     }
                 }
                 stage('CodeSniffer') {
@@ -160,6 +139,8 @@ pipeline {
                     junit allowEmptyResults: true, testResults: 'build/logs/*.xml'
                 }
 
+                publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+
                 recordIssues([
                     sourceCodeEncoding: 'UTF-8',
                     enabledForFailure: true,
@@ -171,8 +152,6 @@ pipeline {
                         phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
                     ]
                 ])
-            
-                // publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
 
                 def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
 
