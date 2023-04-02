@@ -60,6 +60,7 @@ pipeline {
                 docker {
                     image 'sineverba/php8xc:latest'
                     args '-u root:sudo'
+                    reuseNode true
                 }
             }
             steps {
@@ -76,6 +77,7 @@ pipeline {
                         docker {
                             image 'sineverba/php8xc:latest'
                             args '-u root:sudo'
+                            reuseNode true
                         }
                     }
                     steps {
@@ -88,6 +90,7 @@ pipeline {
                         docker {
                             image 'sineverba/php8xc:latest'
                             args '-u root:sudo'
+                            reuseNode true
                         }
                     }
                     steps {
@@ -99,6 +102,7 @@ pipeline {
                         docker {
                             image 'sineverba/php8xc:latest'
                             args '-u root:sudo'
+                            reuseNode true
                         }
                     }
                     steps {
