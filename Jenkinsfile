@@ -9,8 +9,19 @@ def pushDockerImage() {
 }
 
 def cleanUpDocker() {
-    sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
-    sh 'docker image prune -f'
+    def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
+
+    if ("${oldImageID}" != '' ) {
+        sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
+    }
+
+    def currentImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
+
+    if ("${currentImageID}" != '' ) {
+        sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
+    }
+
+    sh 'docker system prune -f'
 }
 
 pipeline {
@@ -171,11 +182,7 @@ pipeline {
                     ]
                 ])
 
-                def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
-
-                if ("${oldImageID}" != '' ) {
-                    cleanUpDocker()
-                }
+                cleanUpDocker()
             }
 
             cleanWs()
