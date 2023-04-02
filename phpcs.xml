@@ -20,9 +20,12 @@
     <exclude-pattern>*.js</exclude-pattern>
 
     <!-- Show progression -->
-    <arg value="p"/>
+    <arg value="np"/>
 
     <!-- Show sniff codes in all reports -->
     <arg value= "s"/>
+
+    <arg name="report" value="junit"/>
+    <arg name="report-file" value="build/logs/phpcs.junit.xml"/>
 
 </ruleset>

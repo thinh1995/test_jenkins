@@ -34,8 +34,6 @@ pipeline {
             }
             steps {
                 script {
-                    junit allowEmptyResults: true, skipPublishingChecks: true, testResults: 'test-results.xml'
-
                     echo "PR Number: ${pullRequest.number}"
                     echo "PR State ${pullRequest.state}"
                     echo "PR Target Branch ${pullRequest.base}"
@@ -94,7 +92,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh 'vendor/bin/phpcs'
+                        sh 'vendor/bin/phpcs --standard=phpcs.xml'
                     }
                 }
                 stage('PHPStan') {
@@ -106,7 +104,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh 'vendor/bin/phpstan analyse --error-format=checkstyle --no-progress -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
+                        sh 'vendor/bin/phpstan analyse --error-format=junit --no-progress -c phpstan.neon > build/logs/phpstan.junit.xml'
                     }
                 }
             }
@@ -151,6 +149,8 @@ pipeline {
                 ])
             
                 publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
+
+                junit allowEmptyResults: true, skipPublishingChecks: true, testResults: 'build/logs/*.junit.xml'
 
                 def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
 
