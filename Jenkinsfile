@@ -15,7 +15,7 @@ def cleanUpDocker() {
         sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}'
     }
 
-    def currentImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
+    def currentImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}", returnStdout: true)
 
     if ("${currentImageID}" != '' ) {
         sh 'docker rmi ${DOCKER_HUB}/${IMAGE_NAME}:${APP_ENV}'
