@@ -25,7 +25,7 @@
     <!-- Show sniff codes in all reports -->
     <arg value= "s"/>
 
-    <arg name="report" value="junit"/>
-    <arg name="report-file" value="build/logs/phpcs.junit.xml"/>
+    <arg name="report" value="checkstyle"/>
+    <arg name="report-file" value="build/logs/phpcs.checkstyle.xml"/>
 
 </ruleset>

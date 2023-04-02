@@ -104,7 +104,7 @@ pipeline {
                         }
                     }
                     steps {
-                        sh 'vendor/bin/phpstan analyse --error-format=junit -c phpstan.neon > build/logs/phpstan.junit.xml'
+                        sh 'vendor/bin/phpstan analyse --error-format=checkstyle -c phpstan.neon > build/logs/phpstan.checkstyle.xml'
                     }
                 }
             }
@@ -143,14 +143,14 @@ pipeline {
                     referenceJobName: "repo-name/master",
                     tools: [
                         php(id: 'php', name: 'php', pattern: 'build/logs/phpunit.junit.xml', reportEncoding: 'UTF-8'),
-                        phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.junit.xml', reportEncoding: 'UTF-8'),
-                        phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.junit.xml', reportEncoding: 'UTF-8'),
+                        phpCodeSniffer(id: 'phpcs', name: 'CodeSniffer', pattern: 'build/logs/phpcs.checkstyle.xml', reportEncoding: 'UTF-8'),
+                        phpStan(id: 'phpstan', name: 'PHPStan', pattern: 'build/logs/phpstan.checkstyle.xml', reportEncoding: 'UTF-8'),
                     ]
                 ])
             
                 publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
 
-                junit allowEmptyResults: true, testResults: 'build/logs/*.junit.xml'
+                junit allowEmptyResults: true, testResults: 'build/logs/*.xml'
 
                 def oldImageID = sh(script: "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}", returnStdout: true)
 
