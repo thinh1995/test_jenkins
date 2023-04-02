@@ -123,7 +123,7 @@ pipeline {
             
                 publishCoverage adapters: [coberturaAdapter('build/logs/cobertura.xml')]
 
-                if (!(sh "docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER}' 2 > $null")) {
+                if (!(sh 'docker images -q  ${DOCKER_HUB}/${IMAGE_NAME}:${BUILD_NUMBER} 2 > $null')) {
                     cleanUpDocker()
                 }
             }
