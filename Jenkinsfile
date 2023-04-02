@@ -28,7 +28,7 @@ pipeline {
     }
 
      stages {
-        stage('Preapre Test Env') {
+        stage('Get latest code') {
             when {
                 changeRequest()
             }
@@ -51,11 +51,21 @@ pipeline {
                     sh "git fetch --all"
                     sh "git checkout origin/${pullRequest.base}"
                     sh "git merge --no-edit origin/${pullRequest.headRef}"
-
-                    echo 'Installing project composer dependencies...'
-                    sh 'composer install'
-                    sh 'cp .env.example .env'
                 }
+            }
+        }
+
+        state('Prepare dependencies') {
+            agent {
+                docker {
+                    image 'sineverba/php8xc:latest'
+                    args '-u root:sudo'
+                }
+            }
+            steps {
+                echo 'Installing project composer dependencies...'
+                sh 'composer install'
+                sh 'cp .env.example .env'
             }
         }
 
