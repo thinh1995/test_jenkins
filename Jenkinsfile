@@ -71,8 +71,7 @@ pipeline {
         stage('Prepare dependencies') {
             agent {
                 docker {
-                    image 'sineverba/php8xc:latest'
-                    args '-u root:sudo'
+                    image 'thinh1995/phpcx:alpine-cli-8.2'
                     reuseNode true
                 }
             }
@@ -100,8 +99,7 @@ pipeline {
                 stage('PHPUnit') {
                     agent {
                         docker {
-                            image 'sineverba/php8xc:latest'
-                            args '-u root:sudo'
+                            image 'thinh1995/phpcx:alpine-cli-8.2'
                             reuseNode true
                         }
                     }
@@ -113,8 +111,7 @@ pipeline {
                 stage('CodeSniffer') {
                     agent {
                         docker {
-                            image 'sineverba/php8xc:latest'
-                            args '-u root:sudo'
+                            image 'thinh1995/phpcx:alpine-cli-8.2'
                             reuseNode true
                         }
                     }
@@ -125,8 +122,7 @@ pipeline {
                 stage('PHPStan') {
                     agent {
                         docker {
-                            image 'sineverba/php8xc:latest'
-                            args '-u root:sudo'
+                            image 'thinh1995/phpcx:alpine-cli-8.2'
                             reuseNode true
                         }
                     }
