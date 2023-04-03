@@ -72,7 +72,6 @@ pipeline {
             agent {
                 docker {
                     image 'thinh1995/phpcx:alpine-cli-8.2'
-                    args '-u root:sudo'
                     reuseNode true
                 }
             }
